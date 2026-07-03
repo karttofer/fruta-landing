@@ -1,0 +1,22 @@
+# Docs — drawn 100% in fruta (ink period). muten routes + carries an sr-only layer (real headings + nav links)
+# so SEO and screen readers still get the content though everything visible is <canvas>. Engine: ~/lib/frutaDocs.
+screen docs
+
+meta {
+  title "Docs — Fruta"
+  description "Get started with fruta: install, the loop, drawing, input. TypeScript-first 2D graphics and games. This page is drawn live with fruta."
+}
+
+use paintScreen from "~/lib/screens.ts"
+
+Page {
+  Stack class("sr-only") {
+    Title "Fruta documentation" h1
+    Text "Install with npm i fruta. ESM-only, zero dependencies, types bundled. Make it, mount it, loop it: dt is seconds since the last frame. Every shape takes a typed options object. Held keys, presses, a movement axis, pointer, a pushdown state machine and game-feel timers. The full API reference is on GitHub."
+    Link "Home" -> "/"
+    Link "Examples" -> "/examples"
+    Link "Playground" -> "/playground"
+    Link "Full API reference on GitHub" -> "https://github.com/karttofer/Fruta#readme"
+  }
+  Custom FrutaScreen inputs(page: "docs")
+}

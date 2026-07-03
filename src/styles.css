@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "@muten/shadcn/globals.css";
+
+/* Fruta brand palette — a warm, cohesive cherry tint over shadcn's light theme (neutrals lean rosy,
+   not the stock cold zinc). Overrides the shadcn @theme tokens; every .btn / bg-* / text-* follows. */
+:root, [data-theme="light"] {
+  --background: #fffcfd;            /* barely-there warm white */
+  --foreground: #27171c;           /* deep plum-charcoal (also the inverted code-block bg) */
+  --card: #ffffff;                 --card-foreground: #27171c;
+  --popover: #ffffff;              --popover-foreground: #27171c;
+  --primary: #fb6f92;              --primary-foreground: #ffffff;   /* cherry */
+  --secondary: #f7eef1;            --secondary-foreground: #5a3b45; /* soft rose surface / muted rose text */
+  --muted: #f7f3f4;                --muted-foreground: #7a636b;     /* rosy grey (AA on white) */
+  /* hover/active wash: a WHISPER of rose, text stays plum (modern shadcn — subtle, not candy) */
+  --accent: #f6edf0;               --accent-foreground: #27171c;
+  --destructive: #e5484d;          --destructive-foreground: #ffffff;
+  --border: #f0e5ea;               --input: #f0e5ea;               --ring: #fb6f92;
+}
+
+/* Muten's layout primitives. In @layer base so Tailwind utilities ALWAYS win the cascade. */
+@layer base {
+  .mu-stack, .mu-page, .mu-header, .mu-nav, .mu-sidebar, .mu-footer { display: flex; flex-direction: column; min-height: 0; }
+  .mu-button, .mu-link { display: inline-flex; align-items: center; gap: 6px; }
+  .muten-outlet { flex: 1 1 auto; min-width: 0; }
+  .mu-skip-link { position: absolute; left: -9999px; top: 8px; padding: 8px 16px; border-radius: 6px; z-index: 1000; }
+  .mu-skip-link:focus { left: 8px; }
+  #mu-main:focus { outline: none; }
+}
+
+/* base page colour behind the cubist backdrops (which are fixed, z-index:-1). */
+html, body { background: var(--background); }
+
+/* fruta canvases scale to their container, aspect preserved (the mouse-mapping fix keeps input exact). */
+canvas { display: block; max-width: 100%; height: auto; }
+
+/* p5.js-style left rail: plain text links, hover → cherry. */
+.rail-link { display: block; padding: 5px 0; font-size: 15px; font-weight: 500; color: color-mix(in oklab, var(--foreground) 72%, transparent); transition: color .15s ease; }
+.rail-link:hover { color: var(--primary); }
+
+/* examples showcase: a sticky sidebar that scrolls on its own. */
+.ex-side { position: sticky; top: 56px; align-self: flex-start; max-height: calc(100vh - 56px); overflow-y: auto; }
+
+/* Show the canvas at (near) native resolution: only shrink to fit, NEVER upscale — upscaling a real-time
+   canvas just blurs it. The stage is capped so a ~600px sketch doesn't sit in an ocean of empty dark. */
+.ex-stage { width: 100%; max-width: 640px; min-height: 560px; display: flex; align-self: center; margin: 0 auto; }
+.ex-stage > * { flex: 1; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.ex-stage canvas { max-width: 100%; max-height: 560px; width: auto; height: auto; display: block; }
+
+/* code card — a clean editor panel: a quiet filename header + a scrollable highlighted body. */
+.code-card { background: #0d1117; border: 1px solid #1f2937; border-radius: 14px; overflow: hidden; }
+.code-head { display: flex; align-items: center; padding: 9px 16px; background: #161b22; border-bottom: 1px solid #1f2937; }
+.code-body { margin: 0; padding: 16px 18px; max-height: 72vh; overflow: auto; font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.code-body code { font: inherit; background: none; padding: 0; white-space: pre; }
+
+/* scrollbars — slim, theme-matched (dark in the code, light in the sidebar). */
+.code-body { scrollbar-width: thin; scrollbar-color: #30363d transparent; }
+.code-body::-webkit-scrollbar { width: 11px; height: 11px; }
+.code-body::-webkit-scrollbar-track { background: transparent; }
+.code-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 8px; border: 3px solid #0d1117; }
+.code-body::-webkit-scrollbar-thumb:hover { background: #475061; }
+.code-body::-webkit-scrollbar-corner { background: transparent; }
+.ex-side { scrollbar-width: thin; scrollbar-color: #f1d7df transparent; }
+.ex-side::-webkit-scrollbar { width: 9px; }
+.ex-side::-webkit-scrollbar-track { background: transparent; }
+.ex-side::-webkit-scrollbar-thumb { background: #f1d7df; border-radius: 8px; border: 2px solid #ffffff; }
+.ex-side::-webkit-scrollbar-thumb:hover { background: #e6b9c6; }
+
+/* highlight.js — GitHub Dark palette */
+.hljs { color: #c9d1d9; background: transparent; }
+.hljs-comment, .hljs-quote { color: #8b949e; font-style: italic; }
+.hljs-keyword, .hljs-operator, .hljs-doctag, .hljs-deletion { color: #ff7b72; }
+.hljs-string, .hljs-regexp, .hljs-addition { color: #a5d6ff; }
+.hljs-number, .hljs-literal, .hljs-meta, .hljs-symbol, .hljs-link { color: #79c0ff; }
+.hljs-property, .hljs-attr, .hljs-attribute, .hljs-variable, .hljs-template-variable { color: #79c0ff; }
+.hljs-title, .hljs-title.function_, .hljs-section, .hljs-name { color: #d2a8ff; }
+.hljs-built_in, .hljs-type, .hljs-title.class_, .hljs-class .hljs-title, .hljs-params { color: #ffa657; }
+.hljs-tag, .hljs-selector-tag, .hljs-bullet { color: #7ee787; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }

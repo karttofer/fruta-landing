@@ -1,0 +1,8 @@
+# Card + its sub-components. Compose: Card { CardHeader { CardTitle(label) CardDescription(label) } CardContent { … } CardFooter { … } }
+# shadcn-for-muten · part · no deps · styles via the semantic .card* classes in globals.css.
+part Card() { Section class("card") { slot } }
+part CardHeader() { Stack class("card-header") { slot } }
+part CardTitle(label: text) { Title "{$label}" h3 class("card-title") }
+part CardDescription(label: text) { Span "{$label}" class("card-description") }
+part CardContent() { Stack class("card-content") { slot } }
+part CardFooter() { Stack class("card-footer") { slot } }

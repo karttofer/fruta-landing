@@ -1,0 +1,12 @@
+# Tabs - a tab bar + panels. The PAGE owns a `text` state (the active tab) + an action that sets it:
+#   state { tab = "account" : text }   action setTab(v: text) mutates tab { tab.set(v) }
+#   TabsList { TabsTrigger(value: "account", current: tab, label: "Account", onSelect: setTab) … }
+#   TabsContent(value: "account", current: tab) { … }
+# shadcn-for-muten · part · no deps · styles via the semantic .tabs* classes in globals.css.
+part TabsList() { Stack class("tabs-list") { slot } }
+part TabsTrigger(value: text, current: text, label: text, onSelect: action) {
+  Button "{$label}" -> $onSelect($value) aria(selected: $value == $current) class("tabs-trigger", "tabs-trigger-active" when $value == $current)
+}
+part TabsContent(value: text, current: text) {
+  Stack class("tabs-content", "hidden" when $value != $current) { slot }
+}

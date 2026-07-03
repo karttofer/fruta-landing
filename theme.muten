@@ -1,0 +1,7 @@
+# @muten/shadcn OWNS the theme (its @theme tokens + the cherry overrides in src/styles.css). We deliberately
+# leave `colors {}` EMPTY here — muten emits theme.muten colors as --color-primary/secondary/accent/muted…,
+# which would collide with (and, under [data-theme=light], beat) shadcn's @theme inline mapping. Empty = no fight.
+# The whole palette lives in src/styles.css. Just declare the scheme so muten knows we're a light site.
+theme {
+  scheme { mode "light" }
+}

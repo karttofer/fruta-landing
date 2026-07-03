@@ -1,0 +1,10 @@
+# CountUp - animate a formatted stat from 0 to its target when it scrolls into view (Custom, keeps the exact
+# formatting: 2.4M / 94% / 40ms / 99.99% / 120K). For a STYLED number use the Custom form directly (it takes the
+# class - a part with params can't), which is what stat bands and hero metrics want:
+#   Stack class("items-center gap-1") {
+#     Custom CountUp inputs(to: "2.4M") class("text-4xl font-bold text-primary")
+#     Span "trees planted" class("text-sm text-muted-foreground")
+#   }
+# The `CountUp(to: ...)` part below is a thin convenience for the unstyled/inherit case (wrap it in a styled Stack).
+# shadcn-for-muten · Custom · no deps · host JS: src/components/CountUp.js.
+part CountUp(to: text) { Custom CountUp inputs(to: $to) }

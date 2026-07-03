@@ -1,0 +1,3 @@
+# Separator - a thin divider line (horizontal). For a vertical one: class("separator separator-vertical").
+# shadcn-for-muten · part · no deps · styles via the semantic .separator class in globals.css.
+part Separator() { Stack class("separator") }

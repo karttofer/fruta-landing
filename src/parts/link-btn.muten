@@ -1,0 +1,10 @@
+# LinkBtn - a navigation link that looks like a button (plug-and-play, no class props). For CTAs that go to a
+# route. Put the label/icon in the slot.
+#   LinkBtn(to: "/signup", variant: "default") { Span "Get started" }
+#   LinkBtn(to: "/docs", variant: "outline") { Span "Read the docs"  Icon "lucide:arrow-right" class("size-4") }
+# variant: default | secondary | outline | ghost | destructive | link. size (optional): "" | sm | lg | xs | icon.
+# shadcn-for-muten · part · no deps · wraps the Link primitive + the .btn recipe.  (size param added by fruta landing)
+part LinkBtn(to: text, variant: text, size: text) {
+  Link -> "{$to}" class("btn btn-{$variant}",
+    "btn-sm" when $size == "sm", "btn-lg" when $size == "lg", "btn-xs" when $size == "xs", "btn-icon" when $size == "icon") { slot }
+}

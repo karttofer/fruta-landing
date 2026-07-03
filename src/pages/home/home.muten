@@ -1,0 +1,25 @@
+# Home — the WHOLE page is one live fruta canvas: a generative cubist composition you can paint on (Picasso-app).
+# muten only routes + carries an sr-only content layer (real h1 + nav links) so SEO and screen readers still get
+# the page even though everything visible is drawn in <canvas>. The cubist engine lives in ~/lib/picasso.ts.
+screen home
+
+meta {
+  title "Fruta — a friendly, tiny 2D graphics and game engine for the web"
+  description "Fruta is a friendly, tiny 2D graphics and game engine. One object, intent-named draw calls, a delta-time loop. TypeScript-first, ~35 KB, zero dependencies, Canvas2D + WebGL. This landing page is itself drawn live with fruta."
+}
+
+use paintLanding from "~/lib/picasso.ts"
+
+Page {
+  # Accessibility + SEO layer (visually hidden; the fruta canvas is the visible page).
+  Stack class("sr-only") {
+    Title "Fruta — a friendly, tiny 2D graphics and game engine for the web" h1
+    Text "One friendly object, intent-named draw calls, a delta-time loop. TypeScript-first, about 35 KB, zero dependencies, Canvas2D and WebGL. This landing page is itself drawn live with fruta — click and drag on it to paint."
+    Link "Examples" -> "/examples"
+    Link "Playground" -> "/playground"
+    Link "Docs" -> "/docs"
+    Link "GitHub" -> "https://github.com/karttofer/Fruta"
+    Link "npm" -> "https://www.npmjs.com/package/fruta"
+  }
+  Custom FrutaPicasso
+}

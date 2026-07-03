@@ -1,0 +1,7 @@
+# Code - a syntax-highlighted TypeScript code block. Takes a snippet NAME ("hero"|"loop"|"draw"|"input"); the
+# Custom (src/components/Code.js) resolves the raw code via codeSnippet() in ~/lib/code.ts and highlights it with
+# our hljs. (Repurposed from the shadcn eject — muten can't feed a use-fn string into a Custom input, so it's
+# name-based like the examples ExCode viewer.)
+part Code(name: text) {
+  Custom Code inputs(name: $name)
+}

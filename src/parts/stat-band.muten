@@ -1,0 +1,9 @@
+# StatBand - a divided row of stats (KPIs), uniform + responsive (2-up on mobile). Each Stat holds its value in
+# the slot (a Span, or a `Custom CountUp` for the count-up animation) plus a label:
+#   StatBand {
+#     Stat(label: "trees planted") { Custom CountUp inputs(to: "2.4M") class("stat-value") }
+#     Stat(label: "countries")     { Span "58" class("stat-value") }
+#   }
+# shadcn-for-muten · block · no deps · uses .stat-band / .stat / .stat-value / .stat-label from globals.css.
+part StatBand() { Stack class("stat-band") { slot } }
+part Stat(label: text) { Stack class("stat") { slot  Span "{$label}" class("stat-label") } }

@@ -1,0 +1,22 @@
+# Examples — drawn in fruta (blue period): a drawn, scrollable list + the live example + code, all in the canvas
+# (the example itself is a fruta program mounted in a framed overlay). muten routes + carries an sr-only layer
+# (headings + nav + example names) for SEO / screen readers. Engine: ~/lib/frutaExamples.
+screen examples
+
+meta {
+  title "Examples — Fruta"
+  description "Live fruta sketches — games, science, math and physics simulations — running in the browser with their full source. This gallery is itself drawn with fruta."
+}
+
+use paintScreen from "~/lib/screens.ts"
+
+Page {
+  Stack class("sr-only") {
+    Title "Fruta examples" h1
+    Text "A live gallery of fruta programs — classic games, graphics, and science, math and physics simulations — each running in the browser with its full source. Pick one from the list to run it and read its code."
+    Link "Home" -> "/"
+    Link "Playground" -> "/playground"
+    Link "Docs" -> "/docs"
+  }
+  Custom FrutaScreen inputs(page: "examples")
+}

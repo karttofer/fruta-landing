@@ -1,0 +1,5 @@
+# A reusable sidebar item for the examples showcase — one template, called once per example. Highlights
+# when it is the current selection. `pick` is the page's select action, `current` the page's state.
+part ExLink(name: text, label: text, current: text, pick: action) {
+  Button "{$label}" -> $pick($name) class("btn btn-ghost btn-sm w-full justify-start font-normal text-muted-foreground") class("bg-accent text-foreground font-semibold" when $current == $name)
+}

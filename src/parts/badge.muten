@@ -1,0 +1,9 @@
+# Badge - a small status descriptor. variant: default | secondary | destructive | outline.
+# shadcn-for-muten · part · no deps · styles via the semantic .badge* classes in globals.css.
+part Badge(label: text, variant: text) {
+  Span "{$label}" class("badge",
+    "badge-default" when $variant == "default",
+    "badge-secondary" when $variant == "secondary",
+    "badge-destructive" when $variant == "destructive",
+    "badge-outline" when $variant == "outline")
+}

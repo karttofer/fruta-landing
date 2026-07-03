@@ -1,0 +1,11 @@
+# Button (part name Btn - `Button` is a muten primitive, so a part can't reuse that name) - a plug-and-play
+# button. No class props: pass a `variant` + your action, put the label/icon in the slot.
+#   Btn(variant: "default", onClick: save) { Span "Save" }
+#   Btn(variant: "outline", onClick: cancel) { Icon "lucide:x" class("size-4")  Span "Cancel" }
+# variant: default | secondary | outline | ghost | destructive | link. size (optional): "" | sm | lg | xs | icon.
+# `Link "..." -> "/path" class("btn btn-default")` for a link-as-button; or use LinkBtn.
+# shadcn-for-muten · part · no deps · wraps the Button primitive + the .btn recipe.  (size param added by fruta landing)
+part Btn(variant: text, onClick: action, size: text) {
+  Button -> $onClick class("btn btn-{$variant}",
+    "btn-sm" when $size == "sm", "btn-lg" when $size == "lg", "btn-xs" when $size == "xs", "btn-icon" when $size == "icon") { slot }
+}

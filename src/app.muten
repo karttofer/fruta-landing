@@ -1,0 +1,12 @@
+# The app ROOT. `routes` maps URLs to pages; every page is now a full-viewport fruta canvas (foreground) that
+# draws its own nav, so the shell is just the outlet. Each page carries its own sr-only nav for keyboard / SEO.
+routes {
+  "/" -> home
+  "/examples" -> examples
+  "/playground" -> playground
+  "/docs" -> docs
+}
+
+shell {
+  slot
+}

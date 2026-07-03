@@ -1,0 +1,7 @@
+# Item + sub-components: a bordered row of media + content + actions.
+# Compose: Item { <Icon/Avatar> ItemContent { ItemTitle(label) ItemDescription(label) } <Button/Switch> }
+# shadcn-for-muten · part · no deps · styles via the semantic .item* classes in globals.css.
+part Item() { Stack class("item") { slot } }
+part ItemContent() { Stack class("item-content") { slot } }
+part ItemTitle(label: text) { Span "{$label}" class("item-title") }
+part ItemDescription(label: text) { Span "{$label}" class("item-description") }

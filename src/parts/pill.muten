@@ -1,0 +1,5 @@
+# Pill - a hero eyebrow chip (bigger than a Badge, rounded-full). Slot-based so you drop an icon + text:
+#   Pill { Icon "lucide:sparkles" class("size-4")  Span "For freelancers, studios and agencies" }
+# Tint it per brand with extra classes: Pill class("bg-blue-50 border-blue-100 text-blue-700").
+# shadcn-for-muten · part · no deps · styles via the semantic .pill class in globals.css.
+part Pill() { Stack class("pill") { slot } }

@@ -1,0 +1,22 @@
+# Playground — a p5.js-editor-style DOM app (toolbar · Monaco · live preview · console), built in real DOM
+# because the editor is fundamentally a DOM thing. muten routes + carries an sr-only layer for SEO / a11y.
+# Engine: ~/lib/editor.ts (mountEditor).
+screen playground
+
+meta {
+  title "Playground — Fruta"
+  description "Write fruta code and see it run live in your browser — a p5.js-style editor with autocompletion, a live preview and a console. Zero install."
+}
+
+use mountEditor from "~/lib/editor.ts"
+
+Page {
+  Stack class("sr-only") {
+    Title "Fruta playground" h1
+    Text "Write fruta code on the left and watch it run live on the right, with full autocompletion and a console. Press Ctrl or Cmd + Enter, or Run. Fruta is in scope and the canvas auto-mounts."
+    Link "Home" -> "/"
+    Link "Examples" -> "/examples"
+    Link "Docs" -> "/docs"
+  }
+  Custom PlaygroundEditor
+}
