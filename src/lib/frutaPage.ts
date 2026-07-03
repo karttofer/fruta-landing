@@ -4,7 +4,7 @@
 // pages (docs) use frutaPage() directly; interactive pages (examples/playground) reuse the exported helpers.
 import Fruta from 'fruta'
 import { FONT, ensureFonts } from './fonts'
-import { drawNavBar, type NavHit } from './nav'
+import { drawNavBar, navHeight, type NavHit } from './nav'
 import { runCode, stopCode } from './run'
 import { tokenizeCode } from './codeHighlight'
 
@@ -77,6 +77,7 @@ export type Block =
   | { t: 'btns'; items: { label: string; to: string; ext?: boolean; primary?: boolean }[] }
   | { t: 'gap'; h: number }
   | { t: 'demo'; code: string; h?: number }        // a LIVE fruta sketch, mounted only while on-screen
+  | { t: 'chart'; kind: 'bar' | 'line'; h?: number; caption?: string; data?: number[]; datums?: { label: string; value: number; color?: string }[]; series?: { name?: string; color?: string; data: number[] }[]; max?: number; colors?: string[] }
 export type PageConfig = { style: string; title: string; subtitle?: string; blocks: Block[] }
 
 export function frutaPage(el: HTMLElement, cfg: PageConfig): Instance {
@@ -101,7 +102,7 @@ export function frutaPage(el: HTMLElement, cfg: PageConfig): Instance {
     if (f.canvas) f.canvas.style.cssText = 'display:block; width:100vw; height:100vh'
     for (const b of cfg.blocks) if (b.t === 'demo') { const d = document.createElement('div'); d.style.cssText = 'position:absolute; overflow:hidden; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#0b0f17; pointer-events:none'; el.appendChild(d); demoEls.push(d); demoRunning.push(false) }
     const cx: CanvasRenderingContext2D = f.context, T = textKit(cx), S = Math.min(W, H)
-    const NAVH = Math.max(56, S * 0.075)
+    const NAVH = navHeight(S)
 
     f.onPress((pt: { x: number; y: number }) => {
       const nb = navHits.find((r) => pt.x >= r.x && pt.x <= r.x + r.w && pt.y >= r.y && pt.y <= r.y + r.h); if (nb) { nb.fn(); return }
@@ -140,6 +141,21 @@ export function frutaPage(el: HTMLElement, cfg: PageConfig): Instance {
         if (b.t === 'h') { const hs = Math.round((b.size || 1.5) * fs); tocEntries.push({ label: b.s.split(' — ')[0], absY: y + scroll }); y += hs * 1.1; T.line(b.s, x0, y, hs, p.ink, '700', 'left', FONT.display); y += fs * 0.4; continue }
         if (b.t === 'p') { for (const ln of T.wrap(b.s, colW, fs, '500')) { y += fs * 1.55; T.line(ln, x0, y, fs, p.text, '500') } y += fs * 0.5; continue }
         if (b.t === 'chips') { let cxp = x0; const cs = Math.round(fs * 0.82); y += cs * 2; for (const c of b.items) { const w = T.measure(c, cs, '700') + cs * 1.4; f.rect({ x: cxp, y: y - cs * 1.4, w, h: cs * 2, radius: cs, fill: 'rgba(0,0,0,0)', stroke: p.ink, strokeWidth: 1.5 }); T.line(c, cxp + w / 2, y, cs, p.ink, '700', 'center'); cxp += w + cs * 0.7 } y += cs * 1.2; continue }
+        if (b.t === 'chart') {                                    // a real fruta chart (dark card so the chart's light text/neons pop)
+          const chH = Math.round((b.h ?? 250) * (fs / 16))
+          y += fs * 0.5
+          if (y + chH > NAVH && y < H) {
+            f.rect({ x: x0, y, w: colW, h: chH, radius: 14, fill: p.code })
+            const pd = Math.round(chH * 0.1), capH = b.caption ? fs * 1.7 : 0
+            const inX = x0 + pd, inY = y + pd, inW = colW - pd * 2, inH = chH - pd * 2 - capH
+            cx.save(); cx.beginPath(); cx.rect(x0, y, colW, chH); cx.clip()
+            if (b.kind === 'bar') f.barChart({ x: inX, y: inY, w: inW, h: inH, data: (b.datums ?? b.data ?? []) as never, colors: b.colors, max: b.max, showValues: true, progress: 1 })
+            else f.lineChart({ x: inX, y: inY, w: inW, h: inH, series: b.series, data: b.data, colors: b.colors, grid: true, points: true, legend: !!b.series, max: b.max, progress: 1 })
+            if (b.caption) T.line(b.caption, x0 + colW / 2, y + chH - fs * 0.6, Math.round(fs * 0.82), p.codeInk, '500', 'center')
+            cx.restore()
+          }
+          y += chH + fs * 0.8; continue
+        }
         if (b.t === 'code') {
           const lines = b.code.split('\n')
           let cs = Math.max(11, Math.round(fs * 0.82))

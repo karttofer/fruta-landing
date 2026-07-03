@@ -8,6 +8,160 @@ export interface Example { name: string; title: string; cat: string; hint: strin
 
 export const EXAMPLES: Example[] = [
   {
+    name: 'spectrum', title: 'Audio Spectrum', cat: 'Audio', hint: 'A synth drives a live FFT — click to start',
+    code: `const f = Fruta({ width: 600, height: 400, background: '#0a0b16' })
+
+// a synth arpeggio feeds the analyser — no mic, no assets (click once to start the sound)
+const notes = ['C4', 'E4', 'G4', 'B4', 'C5', 'B4', 'G4', 'E4']
+const a = f.analyser()
+let ni = 0, next = 0
+
+f.loop((dt, t) => {
+  if (t > next) { next = t + 0.26; f.tone({ note: notes[ni % notes.length], duration: 0.3, type: 'triangle', volume: 0.28 }); ni++ }
+  f.background('#0a0b16')
+
+  const bins = a.freqs(), N = 72
+  for (let i = 0; i < N; i++) {
+    const v = bins[i * 3] / 255
+    f.rect({ x: i * (600 / N), y: 400, w: 600 / N - 2, h: -v * 300, fill: 'hsl(' + (190 + i * 2.2) + ',85%,' + (45 + v * 30) + '%)' })
+  }
+
+  const wave = a.wave(), pts = []
+  for (let i = 0; i < wave.length; i += 6) pts.push({ x: i / wave.length * 600, y: 130 + (wave[i] - 128) / 128 * 80 })
+  f.polygon({ points: pts, stroke: 'rgba(255,255,255,0.85)', strokeWidth: 2, close: false })
+
+  f.text('audio-reactive — a synth drives f.analyser()  ·  click to start', { x: 300, y: 28, fill: 'rgba(255,255,255,0.55)', size: 13, align: 'center' })
+})`,
+  },
+  {
+    name: 'theremin', title: 'Theremin', cat: 'Audio', hint: 'Hold + move the mouse — osc + reverb + analyser',
+    code: `const f = Fruta({ width: 600, height: 400, background: '#100a18' })
+f.reverb(0.4)
+const o = f.osc({ freq: 220, type: 'sine', volume: 0 })
+const a = f.analyser()
+
+f.loop(() => {
+  const freq = f.map(f.mouse.x, 0, 600, 110, 880)
+  const amp = f.mouseDown ? f.map(f.mouse.y, 400, 0, 0, 0.3) : 0
+  o.freq(freq); o.amp(amp)                    // hold the mouse to play
+
+  f.background('#100a18')
+  const wave = a.wave(), pts = []
+  for (let i = 0; i < wave.length; i += 5) pts.push({ x: i / wave.length * 600, y: 210 + (wave[i] - 128) / 128 * 130 })
+  f.polygon({ points: pts, stroke: 'hsl(' + (freq / 880 * 280) + ',90%,66%)', strokeWidth: 3, close: false })
+
+  f.circle({ x: f.mouse.x, y: f.mouse.y, r: 9, fill: 'rgba(255,255,255,0.6)' })
+  f.text('theremin — hold + move the mouse  ·  f.osc + f.reverb + f.analyser', { x: 300, y: 28, fill: 'rgba(255,255,255,0.5)', size: 12, align: 'center' })
+})`,
+  },
+  {
+    name: 'piano', title: 'Piano', cat: 'Audio', hint: 'Click the keys — f.tone({ note }) + reverb',
+    code: `const f = Fruta({ width: 600, height: 400, background: '#171320' })
+f.reverb(0.3)
+
+// one octave: 7 white keys + 5 black. Click a key and f.tone plays that note.
+const whites = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4']
+const blacks = [{ after: 0, note: 'C#4' }, { after: 1, note: 'D#4' }, { after: 3, note: 'F#4' }, { after: 4, note: 'G#4' }, { after: 5, note: 'A#4' }]
+const kw = 600 / 7
+let lit = '', litT = 0
+
+const play = (note) => { f.tone({ note, duration: 0.6, type: 'triangle', volume: 0.3 }); lit = note; litT = 0.25 }
+
+f.onPress((p) => {
+  for (const b of blacks) { const bx = (b.after + 1) * kw - kw * 0.3; if (p.y < 265 && p.x > bx && p.x < bx + kw * 0.6) { play(b.note); return } }
+  play(whites[Math.min(6, Math.floor(p.x / kw))])
+})
+
+f.loop((dt) => {
+  litT = Math.max(0, litT - dt)
+  f.background('#171320')
+  for (let i = 0; i < 7; i++) { const on = lit === whites[i] && litT > 0; f.rect({ x: i * kw + 2, y: 70, w: kw - 4, h: 310, radius: 6, fill: on ? '#ff5470' : '#f2ece3', stroke: '#0c0a12', strokeWidth: 1.5 }) }
+  for (const b of blacks) { const on = lit === b.note && litT > 0; f.rect({ x: (b.after + 1) * kw - kw * 0.3, y: 70, w: kw * 0.6, h: 195, radius: 4, fill: on ? '#ff5470' : '#191521', stroke: '#000', strokeWidth: 1 }) }
+  f.text('piano — click the keys  ·  f.tone({ note }) + f.reverb', { x: 300, y: 40, fill: 'rgba(255,255,255,0.6)', size: 13, align: 'center' })
+})`,
+  },
+  {
+    name: 'sequencer', title: 'Step Sequencer', cat: 'Audio', hint: 'Click cells — a drum-machine grid on a clock',
+    code: `const f = Fruta({ width: 600, height: 400, background: '#0b0e1a' })
+const STEPS = 16, ROWS = 4
+const notes = ['C5', 'G4', 'E4', 'C4']              // one pitch per row, high to low
+const cols = ['#ff5470', '#ffd23f', '#3ddc97', '#4cc9ff']
+const grid = [
+  [1,0,0,0, 1,0,0,0, 1,0,1,0, 1,0,0,0],
+  [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,1],
+  [1,0,0,1, 0,1,0,0, 1,0,0,1, 0,1,0,0],
+  [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,1,0],
+]
+const cw = 600 / STEPS, top = 92, ch = 260 / ROWS
+let step = -1, next = 0
+
+f.onPress((p) => { const c = Math.floor(p.x / cw), r = Math.floor((p.y - top) / ch); if (r >= 0 && r < ROWS && c >= 0 && c < STEPS) grid[r][c] = grid[r][c] ? 0 : 1 })
+
+f.loop((dt, t) => {
+  if (t > next) { next = t + 0.135; step = (step + 1) % STEPS; for (let r = 0; r < ROWS; r++) if (grid[r][step]) f.tone({ note: notes[r], duration: 0.16, type: r === 3 ? 'sine' : 'square', volume: 0.22 }) }
+  f.background('#0b0e1a')
+  f.rect({ x: step * cw, y: top, w: cw, h: ch * ROWS, fill: 'rgba(255,255,255,0.07)' })
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < STEPS; c++) {
+    const on = grid[r][c], hot = on && c === step
+    f.rect({ x: c * cw + 3, y: top + r * ch + 3, w: cw - 6, h: ch - 6, radius: 5, fill: on ? cols[r] : 'rgba(255,255,255,0.06)', stroke: hot ? '#fff' : 'rgba(0,0,0,0)', strokeWidth: 2 })
+  }
+  f.text('step sequencer — click cells to toggle  ·  f.tone on a clock', { x: 300, y: 46, fill: 'rgba(255,255,255,0.6)', size: 13, align: 'center' })
+})`,
+  },
+  {
+    name: 'musicbox', title: 'Music Box', cat: 'Audio', hint: 'Generative pentatonic rain — click once to start',
+    code: `const f = Fruta({ width: 600, height: 400 })
+f.reverb(0.55); f.delay({ time: 0.3, feedback: 0.3, wet: 0.22 })
+const scale = ['C4', 'D4', 'E4', 'G4', 'A4', 'C5', 'D5', 'E5']   // pentatonic — always pretty together
+const LINE = 320
+let drops = [], ripples = [], spawn = 0
+
+f.loop((dt, t) => {
+  if (t > spawn) { spawn = t + 0.22 + Math.random() * 0.4; drops.push({ x: 40 + Math.random() * 520, y: -10, s: Math.floor(Math.random() * scale.length), hit: false }) }
+  f.background('rgba(9,13,26,0.26)')                 // fade instead of clear → soft trails
+  f.line({ x1: 0, y1: LINE, x2: 600, y2: LINE, stroke: 'rgba(120,180,255,0.35)', strokeWidth: 2 })
+  drops = drops.filter((d) => d.y < 430)
+  for (const d of drops) {
+    d.y += 130 * dt
+    if (!d.hit && d.y >= LINE) { d.hit = true; f.tone({ note: scale[d.s], duration: 0.9, type: 'sine', volume: 0.2 }); ripples.push({ x: d.x, r: 0 }) }
+    f.circle({ x: d.x, y: d.y, r: 6, fill: 'hsl(' + (200 + d.s * 15) + ',85%,68%)' })
+  }
+  ripples = ripples.filter((r) => r.r < 70)
+  for (const r of ripples) { r.r += 95 * dt; f.circle({ x: r.x, y: LINE, r: r.r, stroke: 'hsla(210,90%,72%,' + (1 - r.r / 70) + ')', strokeWidth: 2 }) }
+  f.text('music box — generative pentatonic  ·  f.tone + reverb + delay  ·  click to start', { x: 300, y: 28, fill: 'rgba(255,255,255,0.55)', size: 12, align: 'center' })
+})`,
+  },
+  {
+    name: 'chordpads', title: 'Chord Pads', cat: 'Audio', hint: 'Click a pad to strum a chord — lush reverb',
+    code: `const f = Fruta({ width: 600, height: 400, background: '#130f1d' })
+f.reverb(0.6)
+const pads = [
+  { n: 'C',  notes: ['C4', 'E4', 'G4'], c: '#ff6b8a' },
+  { n: 'Am', notes: ['A3', 'C4', 'E4'], c: '#c77dff' },
+  { n: 'F',  notes: ['F3', 'A3', 'C4'], c: '#5ec8ff' },
+  { n: 'G',  notes: ['G3', 'B3', 'D4'], c: '#5effa8' },
+]
+const pw = 300, ph = 200
+let lit = -1, litT = 0
+
+f.onPress((p) => {
+  const i = (p.y < ph ? 0 : 2) + (p.x < pw ? 0 : 1)
+  pads[i].notes.forEach((note) => f.tone({ note, duration: 1.6, type: 'triangle', volume: 0.16 }))
+  lit = i; litT = 0.5
+})
+
+f.loop((dt) => {
+  litT = Math.max(0, litT - dt)
+  f.background('#130f1d')
+  pads.forEach((pad, i) => {
+    const x = (i % 2) * pw, y = (i < 2 ? 0 : 1) * ph, k = lit === i ? litT / 0.5 : 0
+    f.rect({ x: x + 6, y: y + 6, w: pw - 12, h: ph - 12, radius: 16, fill: pad.c, stroke: 'rgba(255,255,255,' + (0.18 + k * 0.7) + ')', strokeWidth: 2 + k * 5 })
+    f.text(pad.n, { x: x + pw / 2, y: y + ph / 2 + 16, fill: 'rgba(18,10,24,0.85)', size: 48, align: 'center' })
+  })
+  f.text('chord pads — click to strum  ·  three f.tone notes + f.reverb', { x: 300, y: 386, fill: 'rgba(255,255,255,0.5)', size: 12, align: 'center' })
+})`,
+  },
+  {
     name: 'orbits', title: 'Orbits', cat: 'Graphics', hint: 'Parametric motion + the loop',
     code: `const f = Fruta({ width: 480, height: 480, background: '#0f1018' })
 

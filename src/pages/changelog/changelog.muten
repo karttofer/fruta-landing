@@ -1,0 +1,24 @@
+# Changelog — drawn 100% in fruta (Persona-5 style). Same route pattern as docs/examples: an sr-only layer carries
+# the real content (SEO + screen readers) while everything visible is a <canvas>. Engine: ~/lib/frutaChangelog.
+screen changelog
+
+meta {
+  title "Changelog — Fruta"
+  description "Every fruta release, drawn live in the engine. Batched draw, fixed timestep, dynamic 2D lighting, full audio, and more. TypeScript-first 2D graphics and games."
+}
+
+use paintScreen from "~/lib/screens.ts"
+
+Page {
+  Stack class("sr-only") {
+    Title "Fruta changelog" h1
+    Text "v0.1.5 — batched draw (100k particles at 60fps on WebGL), fixed timestep, generational entity handles (Registry), flat spatial grid, dynamic 2D lighting, circle collision response, full audio (synth, analyser, mic, reverb, delay, filters), data loading (JSON/CSV), text measure and word-wrap, more pixel filters, quick DOM controls, webcam and video, and case-insensitive keys."
+    Text "v0.1.4 — approach and input buffers (coyote time, jump buffering), floatText popups, keyboard and gamepad menus, undo/redo history, moveAABB tile collision, and a built-in dt clamp."
+    Text "v0.1.0 — the friendly facade with a dt loop, two backends (Canvas2D and WebGL) behind one API, the game kit (physics, particles, camera, scenes, tilemaps), and a tween engine."
+    Link "Home" -> "/"
+    Link "Examples" -> "/examples"
+    Link "Docs" -> "/docs"
+    Link "Full changelog on GitHub" -> "https://github.com/karttofer/Fruta/blob/main/CHANGELOG.md"
+  }
+  Custom FrutaScreen inputs(page: "changelog")
+}

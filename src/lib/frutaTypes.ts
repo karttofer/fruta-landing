@@ -70,7 +70,7 @@ interface FrutaApp {
   /** Write the edited pixels back to the canvas. */ updatePixels(): FrutaApp
   /** Read one pixel's [r,g,b,a]. */ get(x: number, y: number): [number, number, number, number]
   /** Set one pixel (into pixels; call updatePixels to show). */ set(x: number, y: number, color: number[]): FrutaApp
-  /** Apply an image filter to the whole canvas. */ filter(type: 'invert' | 'grayscale' | 'threshold' | 'brightness' | 'posterize' | 'blur', amount?: number): FrutaApp
+  /** Apply an image filter to the whole canvas. */ filter(type: 'invert' | 'grayscale' | 'threshold' | 'brightness' | 'posterize' | 'blur' | 'sepia' | 'erode' | 'dilate', amount?: number): FrutaApp
 
   /** Is a key held? e.g. keyDown('ArrowLeft'). */ keyDown(key: string): boolean
   /** Was a key pressed this frame (one-shot)? */ keyPressed(key: string): boolean
@@ -109,6 +109,27 @@ interface FrutaApp {
   /** Run fn every N seconds. */ every(seconds: number, fn: () => void): FrutaApp
 
   /** Play a beep (Web Audio). */ beep(o?: { freq?: number; time?: number; type?: string; volume?: number }): FrutaApp
+  /** A musical note with a soft envelope. */ tone(o?: { note?: string; freq?: number; duration?: number; type?: string; volume?: number; attack?: number; release?: number }): FrutaApp
+  /** A continuous oscillator you steer live. */ osc(o?: { freq?: number; type?: string; volume?: number }): { freq(hz: number): void; amp(v: number): void; type(t: string): void; stop(): void }
+  /** Tap the mix for a spectrum + waveform + level — audio-reactive visuals. */ analyser(): { freqs(): Uint8Array; wave(): Uint8Array; level(): number }
+  /** Analyse the microphone (prompts for permission). */ mic(): Promise<{ freqs(): Uint8Array; wave(): Uint8Array; level(): number }>
+  /** Hall reverb on the whole mix (wet 0..1, seconds = tail). */ reverb(wet?: number, seconds?: number): FrutaApp
+  /** Feedback echo on the whole mix. */ delay(o?: { time?: number; feedback?: number; wet?: number }): FrutaApp
+  /** Low-pass / high-pass the whole mix at freq Hz. */ lowpass(freq: number, q?: number): FrutaApp
+  highpass(freq: number, q?: number): FrutaApp
+  /** Master volume 0..1. */ volume(v: number): FrutaApp
+  /** Mute / unmute all audio. */ mute(on?: boolean): FrutaApp
+  /** Measure text width without drawing. */ textWidth(text: string, o?: { size?: number; font?: string; weight?: string }): number
+  /** Word-wrapped multi-line text inside width w; returns height drawn. */ paragraph(text: string, o: { x: number; y: number; w: number; size?: number; leading?: number; fill?: string; font?: string; weight?: string; align?: 'left' | 'center' | 'right' }): number
+  /** Download the canvas as a PNG. */ screenshot(filename?: string): FrutaApp
+  /** A blank offscreen canvas to draw onto + reuse as a source. */ createImage(w: number, h: number): HTMLCanvasElement
+  /** Live webcam feed as a drawable source (null if denied). */ webcam(): Promise<HTMLVideoElement | null>
+  /** A <video> as a drawable source. */ video(url: string, o?: { loop?: boolean; muted?: boolean }): Promise<HTMLVideoElement>
+  /** A range slider — read slider.valueAsNumber (p5's createSlider). */ createSlider(o?: { min?: number; max?: number; value?: number; step?: number; x?: number; y?: number }): HTMLInputElement
+  /** A button. */ createButton(label: string, o?: { x?: number; y?: number; onClick?: () => void }): HTMLButtonElement
+  /** A text input — read input.value. */ createInput(o?: { value?: string; placeholder?: string; x?: number; y?: number }): HTMLInputElement
+  /** A labelled checkbox — read check.checked. */ createCheckbox(label?: string, o?: { checked?: boolean; x?: number; y?: number }): HTMLInputElement
+  /** A dropdown — read select.value. */ createSelect(options: string[], o?: { x?: number; y?: number }): HTMLSelectElement
   /** Draw a live debug overlay. */ debug(): FrutaApp
   /** Watch a value in the debug overlay. */ watch(label: string, value: any): FrutaApp
   /** Tear everything down (listeners, loop). */ destroy(): void
@@ -119,6 +140,11 @@ interface FrutaApp {
 /** Create a Fruta app. In the playground the canvas auto-mounts — no config needed. */
 declare function Fruta(config?: FrutaConfig): FrutaApp
 declare namespace Fruta { function gl(config?: FrutaConfig): FrutaApp }
+
+/** Fetch + parse JSON. */ declare function loadJSON<T = any>(url: string): Promise<T>
+/** Fetch text. */ declare function loadText(url: string): Promise<string>
+/** Fetch + parse CSV → row objects (or { headers: false } for cell arrays). */ declare function loadCSV(url: string, o?: { headers?: boolean }): Promise<any[]>
+/** Note name ('A4', 'C#5') → frequency in Hz. */ declare function noteToFreq(note: string): number
 
 /** The host element the playground mounts into (already handled for you). */
 declare const el: HTMLElement

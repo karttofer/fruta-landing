@@ -5,8 +5,9 @@
 import Fruta from 'fruta'
 import { PERIODS, go, drawScene, textKit, type Instance } from './frutaPage'
 import { EXAMPLES, runExample } from './examples'
+import { stopCode } from './run'
 import { FONT, ensureFonts } from './fonts'
-import { drawNavBar, type NavHit } from './nav'
+import { drawNavBar, navHeight, type NavHit } from './nav'
 
 // A cubist category banner colour per section.
 const CAT_COLORS: Record<string, string> = { Graphics: '#2f77b8', Science: '#123e88', Math: '#5f7a3a', Physics: '#cf6a4a', Games: '#d1462f' }
@@ -88,7 +89,7 @@ export function paintExamples(el: HTMLElement): Instance {
     el.appendChild(preview)                                   // keep overlay above the chrome canvas
     const cx: CanvasRenderingContext2D = f.context, T = textKit(cx), S = Math.min(W, H)
     B = Math.max(12, Math.round(S * 0.016)); lastPlace = ''; lastFit = ''   // fruta frame band; force re-place/fit after rebuild
-    const NAVH = Math.max(56, S * 0.075)
+    const NAVH = navHeight(S)
     const listW = Math.max(200, Math.min(300, W * 0.26))
     const wide = W > 720
 
@@ -197,5 +198,5 @@ export function paintExamples(el: HTMLElement): Instance {
   const onResize = () => { clearTimeout(rz); rz = setTimeout(() => { if (alive) build() }, 160) }
   window.addEventListener('resize', onResize)
   build()
-  return { destroy() { alive = false; el.removeEventListener('wheel', onWheel); window.removeEventListener('resize', onResize); if (f) f.destroy(); preview.remove() } }
+  return { destroy() { alive = false; el.removeEventListener('wheel', onWheel); window.removeEventListener('resize', onResize); stopCode(preview); if (f) f.destroy(); preview.remove() } }   // stopCode kills the running example's fruta instance (rAF + audio) — else its theremin/loop leaks into other sections
 }

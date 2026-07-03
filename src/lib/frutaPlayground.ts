@@ -6,7 +6,7 @@ import Fruta from 'fruta'
 import { PERIODS, go, drawScene, textKit, type Instance } from './frutaPage'
 import { runUserCode, starterCode } from './playground'
 import { FONT, ensureFonts } from './fonts'
-import { drawNavBar, type NavHit } from './nav'
+import { drawNavBar, navHeight, type NavHit } from './nav'
 import { FRUTA_DTS } from './frutaTypes'
 
 // Monaco (VS Code's editor) — lazy-loaded from a CDN, ONLY on the playground, so it never bloats the rest of the
@@ -96,7 +96,7 @@ export function paintPlayground(el: HTMLElement): Instance {
     if (f.canvas) f.canvas.style.cssText = 'display:block; width:100vw; height:100vh'
     el.appendChild(edDiv); el.appendChild(host)
     const cx: CanvasRenderingContext2D = f.context, T = textKit(cx), S = Math.min(W, H)
-    const NAVH = Math.max(56, S * 0.075)
+    const NAVH = navHeight(S)
 
     f.onPress((pt: { x: number; y: number }) => {
       const nb = navHits.find((r) => pt.x >= r.x && pt.x <= r.x + r.w && pt.y >= r.y && pt.y <= r.y + r.h); if (nb) { nb.fn(); return }

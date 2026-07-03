@@ -5,6 +5,8 @@ routes {
   "/examples" -> examples
   "/playground" -> playground
   "/docs" -> docs
+  "/articles" -> articles
+  "/changelog" -> changelog
 }
 
 shell {

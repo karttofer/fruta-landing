@@ -6,7 +6,7 @@ import { runCode as runUserCode, stopCode } from './run'
 import { starterCode } from './playground'
 import { FRUTA_DTS } from './frutaTypes'
 import { FONT } from './fonts'
-import { NAV_LINKS } from './nav'
+import { NAV_LINKS, navHeight } from './nav'
 import { LOGO_URL, LOGO_SIZE } from './logo'
 
 type Instance = { destroy(): void }
@@ -36,12 +36,17 @@ function setupTs(monaco: any) {
 }
 
 const h = (tag: string, css: string, props: Record<string, any> = {}) => { const e: any = document.createElement(tag); e.style.cssText = css; Object.assign(e, props); return e }
-// same links + look as the canvas nav bar (nav.ts) so playground ↔ examples/docs don't visually jump.
+// Structurally 1:1 with the canvas nav bar (nav.ts): same height, side padding, logo, link sizes/positions and
+// hamburger — all scale off S = min(W,H) exactly as drawNavBar does — so navigating never shifts the layout.
+// COLOUR is the playground's own section palette (PERIODS.rose in frutaPage.ts); every section keeps its own
+// colours, only the geometry is shared, so a jump between sections recolours the bar without moving anything.
+const NAV_BG = '#fbeadf', NAV_INK = '#7a2f2a', NAV_ACCENT = '#cf3b25'
+const NAV_LINE = 'rgba(0,0,0,0.08)', NAV_BORDER = 'rgba(0,0,0,0.12)', NAV_SEP = 'rgba(0,0,0,0.06)'
 const navLink = (label: string, to: string, ext?: boolean, active?: boolean) => {
-  const base = active ? 'var(--primary)' : 'var(--foreground)'
-  const a: any = h('a', 'color:' + base + '; text-decoration:none; font-size:14px; font-weight:' + (active ? '800' : '600'))
+  // active shown by ACCENT COLOUR only (weight stays 600) so the bold width never shifts the row — that horizontal
+  // "select jump" was the nav appearing to move between sections. The canvas nav lays links out at 600 width too.
+  const a: any = h('a', 'color:' + (active ? NAV_ACCENT : NAV_INK) + '; text-decoration:none; white-space:nowrap; cursor:pointer; font-weight:600')
   a.textContent = label; a.href = to; if (ext) a.target = '_blank'
-  a.onmouseenter = () => (a.style.color = 'var(--primary)'); a.onmouseleave = () => (a.style.color = base)
   return a
 }
 
@@ -49,7 +54,7 @@ export function mountEditor(el: HTMLElement): Instance {
   el.style.cssText = 'position:fixed; inset:0; display:flex; flex-direction:column; background:var(--background); font-family:' + FONT.sans
 
   // ── toolbar ── (fruta-branded: cherry accents, a warm cream bar, controls grouped in a soft well)
-  const bar = h('div', 'display:flex; align-items:center; gap:14px; padding:10px 18px; border-bottom:1px solid var(--border); background:var(--card); flex-wrap:wrap; box-shadow:0 2px 10px rgba(207,59,37,0.04)')
+  const bar = h('div', 'box-sizing:border-box; display:flex; align-items:center; gap:14px; border-bottom:1px solid ' + NAV_LINE + '; background:' + NAV_BG)   // height + padding set 1:1 with the canvas nav in applyLayout
   const logo: any = h('a', 'display:flex; align-items:center; text-decoration:none', { href: '/' })
   logo.append(h('img', 'width:' + LOGO_SIZE + 'px; height:' + LOGO_SIZE + 'px; display:block', { src: LOGO_URL, alt: 'fruta' }))
   const controls = h('div', 'display:flex; align-items:center; gap:8px; padding:5px 8px; background:var(--muted); border:1px solid var(--border); border-radius:12px')
@@ -59,22 +64,20 @@ export function mountEditor(el: HTMLElement): Instance {
   const auto: any = h('input', 'accent-color:var(--primary); width:15px; height:15px; cursor:pointer', { type: 'checkbox', checked: true }); autoWrap.append(auto, document.createTextNode('Auto-run'))
   controls.append(runBtn, stopBtn, h('div', 'width:1px; height:20px; background:var(--border)'), autoWrap)
   const spacer = h('div', 'flex:1')
-  const badge: any = h('a', 'font-size:12px; font-weight:800; color:#fff; background:var(--primary); padding:4px 11px; border-radius:999px; text-decoration:none; box-shadow:0 3px 12px color-mix(in oklab, var(--primary) 45%, transparent)', { href: 'https://www.npmjs.com/package/fruta', target: '_blank' }); badge.textContent = 'fruta · alpha'
   const path = typeof location !== 'undefined' ? location.pathname : ''
   // nav: inline links on wide screens; a hamburger + dropdown submenu on narrow ones (matches the canvas nav)
   const navRow = h('div', 'display:flex; align-items:center; gap:22px')
   for (const l of NAV_LINKS) navRow.append(navLink(l.s, l.to, (l as any).ext, l.to === path))
-  navRow.append(badge)
-  const menu = h('div', 'position:absolute; top:100%; right:14px; margin-top:6px; display:none; flex-direction:column; min-width:190px; background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:0 14px 34px rgba(20,12,6,0.18); padding:6px; z-index:50')
+  const menu = h('div', 'position:absolute; top:100%; right:14px; margin-top:6px; display:none; flex-direction:column; min-width:190px; background:' + NAV_BG + '; border:1px solid ' + NAV_BORDER + '; border-radius:14px; box-shadow:0 14px 34px rgba(20,12,6,0.18); padding:6px; z-index:50')
   const closeMenu = () => { menu.style.display = 'none' }
   NAV_LINKS.forEach((l, i) => {
     const a: any = navLink(l.s, l.to, (l as any).ext, l.to === path)
-    a.style.cssText += '; display:block; padding:10px 14px; border-radius:9px; font-size:15px' + (i > 0 ? '; border-top:1px solid var(--border)' : '')
+    a.style.cssText += '; display:block; padding:11px 14px; border-radius:9px' + (i > 0 ? '; border-top:1px solid ' + NAV_SEP : '')   // font-size set 1:1 in applyLayout
     a.addEventListener('click', closeMenu)
     menu.append(a)
   })
   const burger: any = h('button', 'display:none; flex-direction:column; gap:4px; background:none; border:none; cursor:pointer; padding:8px')
-  for (let i = 0; i < 3; i++) burger.append(h('span', 'width:22px; height:2.5px; border-radius:2px; background:var(--foreground)'))
+  for (let i = 0; i < 3; i++) burger.append(h('span', 'width:22px; height:2.5px; border-radius:2px; background:' + NAV_INK))
   burger.onclick = (e: Event) => { e.stopPropagation(); menu.style.display = menu.style.display === 'none' ? 'flex' : 'none' }
   if (document.addEventListener) document.addEventListener('click', closeMenu)   // click elsewhere closes the submenu
   bar.style.position = 'relative'
@@ -177,6 +180,17 @@ export function mountEditor(el: HTMLElement): Instance {
 
   const applyLayout = () => {
     const w = window.innerWidth, narrow = w < 820, mobileNav = w < 720
+    // Nav geometry 1:1 with drawNavBar (nav.ts): height, side padding, link size + spacing and the hamburger all
+    // scale off S = min(W,H) exactly as the canvas nav does, so the bar lands pixel-for-pixel on Examples/Docs.
+    const S = Math.min(w, window.innerHeight)
+    const navH = navHeight(S), pad = Math.max(18, Math.round(S * 0.028))
+    const ns = Math.max(14, Math.round(S * 0.02)), dns = Math.max(16, Math.round(S * 0.026)), bs = Math.max(20, Math.round(navH * 0.3))
+    bar.style.height = navH + 'px'; bar.style.padding = '0 ' + pad + 'px'
+    navRow.style.gap = Math.round(ns * 1.4) + 'px'
+    for (const a of Array.from(navRow.children) as HTMLElement[]) a.style.fontSize = ns + 'px'
+    for (const a of Array.from(menu.children) as HTMLElement[]) a.style.fontSize = dns + 'px'
+    burger.style.width = bs + 'px'
+    for (const sp of Array.from(burger.children) as HTMLElement[]) { sp.style.width = bs + 'px'; sp.style.height = Math.max(2.5, Math.round(bs * 0.13)) + 'px' }
     main.style.flexDirection = narrow ? 'column' : 'row'
     edWrap.style.borderRight = narrow ? 'none' : '1px solid var(--border)'
     edWrap.style.borderBottom = narrow ? '1px solid var(--border)' : 'none'

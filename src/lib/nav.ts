@@ -5,9 +5,13 @@ import { FONT } from './fonts'
 import { logoImage, LOGO_SIZE } from './logo'
 
 export const NAV_LINKS = [
-  { s: 'Examples', to: '/examples' }, { s: 'Playground', to: '/playground' }, { s: 'Docs', to: '/docs' }, { s: 'GitHub ↗', to: 'https://github.com/karttofer/Fruta', ext: true },
+  { s: 'Examples', to: '/examples' }, { s: 'Playground', to: '/playground' }, { s: 'Docs', to: '/docs' }, { s: 'Articles', to: '/articles' }, { s: 'Changelog', to: '/changelog' }, { s: 'GitHub ↗', to: 'https://github.com/karttofer/Fruta', ext: true },
 ]
 export type NavHit = { x: number; y: number; w: number; h: number; fn: () => void }
+
+// ONE nav height for every section (canvas pages + the DOM playground). Used everywhere so navigating never
+// changes the bar's height — the source of the "nav jumps section to section" shift. S = min(viewport W, H).
+export const navHeight = (S: number): number => Math.max(56, Math.round(S * 0.075))
 
 // The fruta cherry mark — drawn from the shared SVG (logo.ts) via drawImage; falls back to primitives for the
 // first frame until the SVG decodes. x = left edge, yc = mark's vertical centre, s = square size (px). Returns width.
@@ -28,7 +32,12 @@ export function drawNavBar(o: {
   f: any; cx: CanvasRenderingContext2D; W: number; H: number; S: number; navH: number
   ink: string; accent: string; bg: string; path: string; menu: { open: boolean }; hits: NavHit[]; onNav: (to: string, ext?: boolean) => void; strip?: boolean
 }) {
-  const { f, cx, W, H, S, navH, ink, accent, bg, path, menu, hits, onNav } = o
+  const { f, cx, W, H, S, navH, path, menu, hits, onNav } = o
+  // ONE unified nav across the whole site: every standard content page (strip) shares the same warm bar — cream
+  // background, dark ink, vermilion accent — so moving between sections (and to the playground) never colour-jumps.
+  // Dark, art-directed pages that opt out with strip:false keep their own ink/accent for legibility on their bg.
+  const strip = o.strip !== false
+  const ink = strip ? '#1a1613' : o.ink, accent = strip ? '#cf3b25' : o.accent, bg = strip ? '#f1e8d5' : o.bg
   const label = (s: string, x: number, y: number, size: number, col: string, weight = '600', align: CanvasTextAlign = 'left', font = FONT.sans) => { cx.save(); cx.font = `${weight} ${size}px ${font}`; cx.textAlign = align; cx.textBaseline = 'alphabetic'; cx.fillStyle = col; cx.fillText(s, x, y); cx.restore() }
   const measure = (s: string, size: number, weight = '600', font = FONT.sans) => { cx.save(); cx.font = `${weight} ${size}px ${font}`; const w = cx.measureText(s).width; cx.restore(); return w }
 

@@ -1,0 +1,22 @@
+# Articles — deep-dive posts drawn 100% in fruta (block engine + real fruta charts). Same route pattern as docs:
+# an sr-only layer carries the prose for SEO / screen readers while everything visible is a <canvas>.
+screen articles
+
+meta {
+  title "Articles — Fruta"
+  description "Deep dives on how fruta works: benchmarks, internals, and technique. Drawing 100,000 things — Canvas2D vs WebGL, measured. TypeScript-first 2D graphics and games."
+}
+
+use paintScreen from "~/lib/screens.ts"
+
+Page {
+  Stack class("sr-only") {
+    Title "Fruta articles" h1
+    Text "Drawing 100,000 things: Canvas2D vs WebGL. We measured how many moving particles fruta can push. Immediate Canvas2D draws every circle one at a time (~6 fps at 50k). Batching collapses the state changes and roughly doubles it (~12 fps). WebGL rasterizes the same batch on the GPU in parallel and reaches ~110 fps — about nine times the throughput. The GPU holds 60–70 fps at 100k particles and stays playable at 200k. Switching backends is one word: Fruta with renderer webgl, then f.circles(xs, ys, r). Hundreds to a few thousand shapes belong on Canvas2D; tens of thousands and up belong on WebGL — same API either way."
+    Link "Home" -> "/"
+    Link "Docs" -> "/docs"
+    Link "Examples" -> "/examples"
+    Link "Changelog" -> "/changelog"
+  }
+  Custom FrutaScreen inputs(page: "articles")
+}

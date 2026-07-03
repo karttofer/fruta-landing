@@ -6,9 +6,14 @@ import Fruta from 'fruta'
 
 const reg = new WeakMap<HTMLElement, Array<{ destroy(): void }>>()
 
+// Silence THEN destroy. fruta 0.1.5's destroy() cancels the rAF but doesn't stop a continuous oscillator (osc/
+// theremin) or close the audio context, so a sound example would keep playing after you leave the page. Muting the
+// master to 0 first makes destroy final. (fruta core also gains AudioManager.dispose() so a republish fixes it fully.)
+const teardown = (i: any) => { try { i.volume?.(0) } catch { /* no audio */ } try { i.mute?.(true) } catch { /* no audio */ } try { i.destroy() } catch { /* ignore */ } }
+
 export function runCode(host: HTMLElement, code: string): void {
   const prev = reg.get(host)
-  if (prev) for (const i of prev) { try { i.destroy() } catch { /* ignore */ } }
+  if (prev) for (const i of prev) teardown(i)
   host.replaceChildren()
   const created: Array<{ destroy(): void }> = []
   // dpr:true → crisp on retina; the example's own cfg still wins if it sets dpr explicitly.
@@ -22,7 +27,7 @@ export function runCode(host: HTMLElement, code: string): void {
 /** Stop + tear down whatever runCode mounted into a host (used to unmount off-screen doc demos). */
 export function stopCode(host: HTMLElement): void {
   const prev = reg.get(host)
-  if (prev) for (const i of prev) { try { i.destroy() } catch { /* ignore */ } }
+  if (prev) for (const i of prev) teardown(i)
   reg.delete(host)
   host.replaceChildren()
 }

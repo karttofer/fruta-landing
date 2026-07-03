@@ -19,9 +19,9 @@ try { (globalThis as any).location = { pathname: '/docs' } } catch {}
 
 mock.module('fruta', () => ({ default: () => app, noise: () => 0, hsl: () => '#fff', hsla: () => '#fff' }))
 
-test('docs + examples + playground paint + nav-press + destroy without throwing', async () => {
+test('docs + examples + playground + changelog + articles paint + nav-press + destroy without throwing', async () => {
   const { paintScreen } = await import('./screens')
-  for (const name of ['docs', 'examples', 'playground']) {
+  for (const name of ['docs', 'examples', 'playground', 'changelog', 'articles']) {
     const el = node()
     const inst = paintScreen(el, name)
     expect(loopFn).toBeTypeOf('function')
