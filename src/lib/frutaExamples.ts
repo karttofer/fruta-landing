@@ -77,7 +77,7 @@ export function paintExamples(el: HTMLElement): Instance {
     const key = w + 'x' + h; if (key === lastFit) return; lastFit = key
     c.style.cssText = 'display:block; margin:auto; width:' + w + 'px; height:' + h + 'px'   // margin:auto centers within the flex frame
   }
-  const showPreview = () => { preview.style.display = tab === 'preview' ? 'block' : 'none'; preview.style.pointerEvents = tab === 'preview' ? 'auto' : 'none' }
+  const showPreview = () => { preview.style.display = tab === 'preview' ? 'flex' : 'none'; preview.style.pointerEvents = tab === 'preview' ? 'auto' : 'none' }   // flex → the canvas stays centred on BOTH axes
   const runSel = () => { runExample(preview, sel); lastFit = ''; showPreview() }
 
   const build = () => {
@@ -182,7 +182,7 @@ export function paintExamples(el: HTMLElement): Instance {
       drawNavBar({ f, cx, W, H, S, navH: NAVH, ink: p.ink, accent: p.accent, bg: p.bg, path: typeof location !== 'undefined' ? location.pathname : '', menu: navMenu, hits: navHits, onNav: (to, ext) => go(to, ext) })
 
       if (f.canvas) f.canvas.style.cursor = navHits.some((r) => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) || hits.some((r) => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h && my > NAVH - 1) ? 'pointer' : 'default'
-      preview.style.display = tab === 'preview' && !navMenu.open ? 'block' : 'none'   // hide the DOM overlay so the menu is on top
+      preview.style.display = tab === 'preview' && !navMenu.open ? 'flex' : 'none'   // flex keeps it centred; hide when the menu is on top
     })
     runSel()
   }

@@ -162,38 +162,6 @@ f.loop((dt) => {
 })`,
   },
   {
-    name: 'gravitymesh', title: 'Gravity Well', cat: 'Science', hint: 'Click to drop masses — they sink the sheet',
-    code: `const f = Fruta({ width: 600, height: 600, background: '#06070d' })
-const G = 26, S = 600 / G
-const masses = [{ x: 300, y: 300, m: 1.4 }]
-f.onPress((p) => masses.push({ x: p.x, y: p.y, m: 0.7 + Math.random() * 0.8 }))
-
-// each grid node is pulled inward and SINKS toward every mass (a rubber-sheet well)
-function warp(gx, gy) {
-  const ox = gx * S, oy = gy * S
-  let dx = 0, dy = 0, dip = 0
-  for (const m of masses) {
-    const ax = ox - m.x, ay = oy - m.y, r = Math.hypot(ax, ay) + 1
-    const k = Math.min(0.45, 5200 * m.m / (r * r))
-    dx -= ax * k; dy -= ay * k
-    dip += 4600 * m.m / (r + 50)
-  }
-  return { x: ox + dx, y: oy + dy + dip, d: dip }
-}
-function edge(a, b) {
-  const op = Math.min(0.75, 0.08 + (a.d + b.d) / 420)
-  f.line({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, stroke: 'rgba(120,160,245,' + op.toFixed(2) + ')', strokeWidth: 1 })
-}
-
-f.loop(() => {
-  f.background('#06070d')
-  for (let gy = 0; gy <= G; gy++) for (let gx = 0; gx < G; gx++) edge(warp(gx, gy), warp(gx + 1, gy))
-  for (let gx = 0; gx <= G; gx++) for (let gy = 0; gy < G; gy++) edge(warp(gx, gy), warp(gx, gy + 1))
-  for (const m of masses) f.circle({ x: m.x, y: m.y, r: 6 + m.m * 5, fill: '#ffd24a' })
-  f.text('click to add a mass', { x: 300, y: 585, fill: 'rgba(255,255,255,0.4)', size: 13, align: 'center' })
-})`,
-  },
-  {
     name: 'pendulum', title: 'Double Pendulum', cat: 'Science', hint: 'Deterministic chaos + a trail',
     code: `const f = Fruta({ width: 600, height: 600, background: '#0a0b12' })
 const m1 = 1, m2 = 1, L1 = 1, L2 = 1, g = 1
@@ -443,22 +411,6 @@ f.loop((dt, t) => {
 })`,
   },
   {
-    name: 'pendwave', title: 'Pendulum Wave', cat: 'Science', hint: 'Detuned frequencies drift in and out of phase',
-    code: `const f = Fruta({ width: 600, height: 440, background: '#0a0b14' })
-const N = 18
-
-f.loop((dt, t) => {
-  f.background('#0a0b14')
-  f.line({ x1: 30, y1: 40, x2: 570, y2: 40, stroke: 'rgba(140,160,200,0.3)', strokeWidth: 2 })
-  for (let i = 0; i < N; i++) {
-    const len = 120 + i * 14, ang = Math.sin(t * (1.5 + i * 0.05)) * 0.6
-    const ax = 50 + i * 28, x = ax + Math.sin(ang) * len, y = 40 + Math.cos(ang) * len
-    f.line({ x1: ax, y1: 40, x2: x, y2: y, stroke: 'rgba(140,160,200,0.25)', strokeWidth: 1 })
-    f.circle({ x, y, r: 9, fill: 'hsl(' + (i / N * 300 | 0) + ',75%,62%)' })
-  }
-})`,
-  },
-  {
     name: 'cloth', title: 'Cloth Simulation', cat: 'Science', hint: 'Drag it — Verlet springs + gravity',
     code: `const f = Fruta({ width: 600, height: 600, background: '#0a0d16' })
 const COLS = 24, ROWS = 17, sp = 21, ox = 300 - (COLS - 1) * sp / 2
@@ -482,10 +434,16 @@ f.loop(() => {
 })`,
   },
   {
-    name: 'efield', title: 'Electric Field', cat: 'Science', hint: 'Click to drop charges — field lines trace out',
+    name: 'efield', title: 'Electric Field', cat: 'Science', hint: 'Drag the charges around · click empty space to add one',
     code: `const f = Fruta({ width: 600, height: 600, background: '#06070d' })
-const charges = [{ x: 230, y: 300, q: 1 }, { x: 370, y: 300, q: -1 }]
-f.onPress((p) => charges.push({ x: p.x, y: p.y, q: charges.length % 2 ? -1 : 1 }))
+const charges = [{ x: 220, y: 300, q: 1 }, { x: 380, y: 300, q: -1 }]
+let drag = null
+f.onPress((p) => {
+  for (const c of charges) if (Math.hypot(c.x - p.x, c.y - p.y) < 22) { drag = c; return }   // grab a nearby charge…
+  charges.push({ x: p.x, y: p.y, q: charges.length % 2 ? -1 : 1 })                            // …or drop a new one
+})
+f.onRelease(() => { drag = null })
+
 function field(x, y) {
   let ex = 0, ey = 0
   for (const c of charges) { const dx = x - c.x, dy = y - c.y, d2 = dx * dx + dy * dy + 36, d = Math.sqrt(d2), k = c.q * 9000 / (d2 * d); ex += dx * k; ey += dy * k }
@@ -493,6 +451,7 @@ function field(x, y) {
 }
 
 f.loop(() => {
+  if (drag) { drag.x = f.mouse.x; drag.y = f.mouse.y }
   f.background('#06070d')
   for (const c of charges) {
     if (c.q < 0) continue
@@ -506,7 +465,12 @@ f.loop(() => {
       }
     }
   }
-  for (const c of charges) { f.circle({ x: c.x, y: c.y, r: 11, fill: c.q > 0 ? '#ff6f91' : '#67c7ff' }); f.text(c.q > 0 ? '+' : '-', { x: c.x, y: c.y + 5, fill: '#fff', size: 16, align: 'center' }) }
+  for (const c of charges) {
+    if (c === drag) f.circle({ x: c.x, y: c.y, r: 16, stroke: '#fff', strokeWidth: 2 })
+    f.circle({ x: c.x, y: c.y, r: 12, fill: c.q > 0 ? '#ff6f91' : '#67c7ff' })
+    f.text(c.q > 0 ? '+' : '-', { x: c.x, y: c.y + 5, fill: '#fff', size: 16, align: 'center' })
+  }
+  f.text('drag the charges · click to add', { x: 300, y: 585, fill: 'rgba(255,255,255,0.4)', size: 13, align: 'center' })
 })`,
   },
   {
@@ -648,27 +612,39 @@ f.loop((dt, t) => {
 })`,
   },
   {
-    name: 'reflection', title: 'Non-Orthogonal Reflection', cat: 'Physics', hint: 'Click to aim the wall — the ball reflects',
+    name: 'reflection', title: 'Non-Orthogonal Reflection', cat: 'Physics', hint: 'Click to aim the tilted wall — the rain bounces off it',
     code: `const f = Fruta({ width: 600, height: 600, background: '#0c1018' })
-const wall = { x1: 90, y1: 470, x2: 510, y2: 360 }
-const ball = { x: 300, y: 60, vx: 70, vy: 0 }
-f.onPress((p) => { wall.x2 = p.x; wall.y2 = p.y })
+const wall = { x1: 120, y1: 300, x2: 480, y2: 430 }     // a tilted wall, pivoting on (x1, y1)
+f.onPress((p) => { wall.x2 = p.x; wall.y2 = p.y })       // click sets the far end → aim the wall
+const balls = []
+let spawn = 0
+
+// reflect a ball off the wall SEGMENT: mirror its velocity about the surface normal, then lift it clear
+function reflect(b) {
+  const wx = wall.x2 - wall.x1, wy = wall.y2 - wall.y1, wl2 = wx * wx + wy * wy
+  const t = ((b.x - wall.x1) * wx + (b.y - wall.y1) * wy) / wl2
+  if (t < 0 || t > 1) return                             // past the ends of the segment
+  const cx = wall.x1 + wx * t, cy = wall.y1 + wy * t      // closest point on the wall
+  const dx = b.x - cx, dy = b.y - cy, dist = Math.hypot(dx, dy) || 1
+  if (dist > 9) return
+  const nx = dx / dist, ny = dy / dist, vn = b.vx * nx + b.vy * ny
+  if (vn < 0) { b.vx -= 2 * vn * nx; b.vy -= 2 * vn * ny; b.vx *= 0.92; b.vy *= 0.92; b.x = cx + nx * 9; b.y = cy + ny * 9 }
+}
 
 f.loop((dt) => {
   const d = Math.min(dt, 0.03)
-  ball.vy += 320 * d
-  ball.x += ball.vx * d; ball.y += ball.vy * d
-  const wx = wall.x2 - wall.x1, wy = wall.y2 - wall.y1, wl = Math.hypot(wx, wy)
-  const nx = -wy / wl, ny = wx / wl                                    // unit normal of the wall
-  const proj = ((ball.x - wall.x1) * wx + (ball.y - wall.y1) * wy) / (wl * wl)
-  if (proj > 0 && proj < 1) {
-    const dist = (ball.x - wall.x1) * nx + (ball.y - wall.y1) * ny, vn = ball.vx * nx + ball.vy * ny
-    if (Math.abs(dist) < 11 && vn < 0) { ball.vx -= 2 * vn * nx; ball.vy -= 2 * vn * ny; ball.vx *= 0.94; ball.vy *= 0.94 }
-  }
-  if (ball.x < -20 || ball.x > 620 || ball.y > 620) { ball.x = f.rand(120, 480); ball.y = 40; ball.vx = f.rand(-80, 80); ball.vy = 0 }
+  spawn += d
+  if (spawn > 0.16 && balls.length < 90) { spawn = 0; balls.push({ x: f.rand(120, 480), y: -10, vx: f.rand(-30, 30), vy: 0 }) }
   f.background('#0c1018')
-  f.line({ x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, stroke: '#ffd24a', strokeWidth: 5, cap: 'round' })
-  f.circle({ x: ball.x, y: ball.y, r: 9, fill: '#67d4ff' })
+  f.line({ x1: wall.x1, y1: wall.y1, x2: wall.x2, y2: wall.y2, stroke: '#ffd24a', strokeWidth: 6, cap: 'round' })
+  for (let i = balls.length - 1; i >= 0; i--) {
+    const b = balls[i]
+    for (let s = 0; s < 2; s++) { const hd = d / 2; b.vy += 520 * hd; b.x += b.vx * hd; b.y += b.vy * hd; reflect(b) }   // 2 sub-steps → no tunnelling
+    if (b.y > 620 || b.x < -30 || b.x > 630) { balls.splice(i, 1); continue }
+    f.circle({ x: b.x, y: b.y, r: 6, fill: '#67d4ff' })
+  }
+  f.circle({ x: wall.x1, y: wall.y1, r: 5, fill: '#ff8f5a' })
+  f.text('click to aim the wall', { x: 300, y: 580, fill: 'rgba(255,255,255,0.4)', size: 13, align: 'center' })
 })`,
   },
   {
@@ -835,14 +811,18 @@ f.loop((dt) => {
 })`,
   },
   {
-    name: 'sand', title: 'Falling Sand', cat: 'Physics', hint: 'Hold the mouse to pour sand',
+    name: 'sand', title: 'Falling Sand', cat: 'Physics', hint: 'Hold the mouse to pour sand (it auto-pours a demo stream first)',
     code: `const f = Fruta({ width: 480, height: 480, background: '#0a0a0e' })
 const N = 80, S = 480 / N, grid = new Int16Array(N * N)
 let hue = 20
 
-f.loop(() => {
-  if (f.mouseDown) {
-    const gx = (f.mouse.x / S) | 0, gy = (f.mouse.y / S) | 0
+f.loop((dt, t) => {
+  // pour where you hold the mouse — and, for the first few seconds, auto-demo a swaying stream
+  const pouring = f.mouseDown || t < 3
+  const px = f.mouseDown ? f.mouse.x : 240 + Math.sin(t * 2) * 120
+  const py = f.mouseDown ? f.mouse.y : 40
+  if (pouring) {
+    const gx = (px / S) | 0, gy = (py / S) | 0
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = gx + dx, y = gy + dy; if (x >= 0 && x < N && y >= 0 && y < N && !grid[y * N + x]) grid[y * N + x] = (hue | 0) % 60 + 1 }
     hue += 1.5
   }
@@ -854,6 +834,7 @@ f.loop(() => {
   }
   f.background('#0a0a0e')
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const g = grid[y * N + x]; if (g) f.rect({ x: x * S, y: y * S, w: S, h: S, fill: 'hsl(' + (g * 6 + 20) + ',70%,58%)' }) }
+  f.text('hold the mouse to pour sand', { x: 240, y: 466, fill: 'rgba(255,255,255,0.45)', size: 13, align: 'center' })
 })`,
   },
   {
@@ -918,13 +899,15 @@ for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { const px = ox + 
 for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) { const i = y * COLS + x; if (x < COLS - 1) links.push([i, i + 1]); if (y < ROWS - 1) links.push([i, i + COLS]) }
 
 f.loop((dt, t) => {
+  const gust = 0.5 + 0.35 * Math.sin(t * 1.1) + 0.18 * Math.sin(t * 2.9 + 1)   // wind strength rises and falls in gusts
   for (const p of pts) {
     if (p.pin) continue
-    const vx = (p.x - p.ox) * 0.96, vy = (p.y - p.oy) * 0.96
+    const vx = (p.x - p.ox) * 0.97, vy = (p.y - p.oy) * 0.97
     p.ox = p.x; p.oy = p.y
-    const edge = p.gx / COLS                                         // 0 at the pole → 1 at the free end
-    p.x += vx + 0.08                                                 // a steady breeze keeps it extended
-    p.y += vy + Math.sin(p.gx * 0.55 - t * 6) * edge * 1.5 + 0.05    // a wave travels out, growing toward the free end
+    const edge = p.gx / COLS                                              // 0 at the pole → 1 at the free end
+    const ripple = Math.sin(p.gx * 0.5 - t * (4 + gust * 6)) * edge * (0.6 + gust * 2.2)   // flutter — faster + bigger in stronger wind
+    p.x += vx + gust * (0.3 + edge * 1.6)                                 // the wind billows the flag downwind, free end most
+    p.y += vy + ripple + 0.05                                            // flutter + a little gravity
   }
   for (let k = 0; k < 6; k++) for (const [a, b] of links) { const pa = pts[a], pb = pts[b], dx = pb.x - pa.x, dy = pb.y - pa.y, dd = Math.hypot(dx, dy) || 1, m = (sp - dd) / dd * 0.5; if (!pa.pin) { pa.x -= dx * m; pa.y -= dy * m } if (!pb.pin) { pb.x += dx * m; pb.y += dy * m } }
   f.background('#0c1018')

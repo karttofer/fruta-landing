@@ -6,6 +6,7 @@ import Fruta from 'fruta'
 import { PAL, shade, FEATURES } from './picassoShared'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'
+import { drawCodeLine } from './codeHighlight'
 
 type Instance = { destroy(): void }
 
@@ -67,29 +68,45 @@ export function paintMobile(el: HTMLElement): Instance {
       taps = []
       const navH = Math.max(52, Math.round(S * 0.14)), cw = Math.min(W - 32, 460), x0 = (W - cw) / 2
       const ts = Math.max(15, Math.round(S * 0.021)), mS = Math.max(12, Math.round(S * 0.016))
-      let y = navH + 26 - scroll
+      let y = navH + 44 - scroll
 
       // ── hero ──
       const wm = Math.round(Math.min(W * 0.2, S * 0.16))
-      label('Fruta', W / 2 + wm * 0.05, y + wm + wm * 0.05, wm, PAL.verm, '800', 'center', FONT.display)
-      cx.save(); cx.shadowColor = 'rgba(30,16,8,0.25)'; cx.shadowBlur = wm * 0.08; cx.shadowOffsetY = wm * 0.03; label('Fruta', W / 2, y + wm, wm, PAL.ink, '800', 'center', FONT.display); cx.restore()
-      y += wm * 1.52                                                   // extra breathing room below the wordmark
-      for (const ln of wrap('A tiny, friendly 2D engine for the web — and this page is itself a fruta painting.', cw, ts, '500')) { label(ln, W / 2, y, ts, 'rgba(20,20,20,0.74)', '500', 'center'); y += ts * 1.42 }
-      y += S * 0.03
-      heroCube(W / 2, y + S * 0.2 + Math.sin(t * 0.9) * S * 0.012, S * 0.12); y += S * 0.42
+      const wmw = Math.round(Math.min(wm, wm * (W * 0.82) / Math.max(1, measure('fruta.ts', wm, '800', FONT.mono))))
+      cx.save(); cx.shadowColor = 'rgba(30,16,8,0.22)'; cx.shadowBlur = wmw * 0.06; cx.shadowOffsetY = wmw * 0.025; label('fruta.ts', W / 2, y + wmw, wmw, PAL.ink, '800', 'center', FONT.mono); cx.restore()
+      y += wmw * 1.7                                                   // extra breathing room below the wordmark
+      for (const ln of wrap('A tiny, friendly 2D engine for the web — and this page is itself a fruta painting.', cw, ts, '500')) { label(ln, W / 2, y, ts, 'rgba(20,20,20,0.74)', '500', 'center'); y += ts * 1.5 }
+      y += S * 0.08
+      // hero: the cube framed by a little constellation of cubist fruit orbiting through it (depth-sorted)
+      const cy = y + S * 0.22 + Math.sin(t * 0.9) * S * 0.012
+      const orbit = [PAL.verm, PAL.ochre, PAL.teal, PAL.rose, PAL.blue, PAL.plum]
+      const drawOrbit = (front: boolean) => {
+        for (let i = 0; i < orbit.length; i++) {
+          const a = t * 0.5 + i / orbit.length * 6.283, s = Math.sin(a)
+          if ((s > 0) !== front) continue
+          const sz = S * 0.02 + (s + 1) * S * 0.005
+          f.ngon({ x: W / 2 + Math.cos(a) * S * 0.24, y: cy + s * S * 0.11, r: sz, sides: 3 + i % 4, rotation: t * 40 + i * 30, fill: orbit[i], stroke: PAL.ink, strokeWidth: 2 })
+        }
+      }
+      drawOrbit(false); heroCube(W / 2, cy, S * 0.12); drawOrbit(true)
+      y += S * 0.62                                                    // more air between the hero and the CTAs
       const bH = Math.max(50, Math.round(S * 0.14))
-      mbtn('Start coding  ▶', x0, y, cw, bH, '/playground', true); y += bH + 12
-      mbtn('See examples', x0, y, cw, bH, '/examples', false); y += bH + 14
-      label('npm i fruta', W / 2, y + ts, ts * 0.95, 'rgba(20,20,20,0.55)', '600', 'center', FONT.mono); y += ts * 2.4
+      mbtn('Start coding  ▶', x0, y, cw, bH, '/playground', true); y += bH + 16
+      mbtn('See examples', x0, y, cw, bH, '/examples', false); y += bH + 30
+      label('npm i fruta', W / 2, y + ts * 1.4, ts * 0.95, 'rgba(20,20,20,0.55)', '600', 'center', FONT.mono); y += ts * 3.9
 
       // ── section heading ──
-      label("What's inside", W / 2, y + ts, Math.round(ts * 1.15), PAL.ink, '800', 'center', FONT.display); y += ts * 2.6
+      label("What's inside", W / 2, y + ts, Math.round(ts * 1.15), PAL.ink, '800', 'center', FONT.display); y += ts * 3.3
 
       // ── feature cards ──
-      const pad = 16, icR = Math.max(20, Math.round(S * 0.05)), titleS = Math.max(17, Math.round(S * 0.024)), dS = Math.max(14, Math.round(S * 0.019))
+      const pad = 18, icR = Math.max(20, Math.round(S * 0.05)), titleS = Math.max(17, Math.round(S * 0.024)), dS = Math.max(14, Math.round(S * 0.019))
       FEATURES.forEach((ft, idx) => {
-        const dl = wrap(ft.d, cw - pad * 2, dS), codeH = mS * 2.4
-        const h = pad + Math.max(icR * 2, titleS * 2.2) + dl.length * dS * 1.4 + 12 + codeH + pad
+        const dl = wrap(ft.d, cw - pad * 2, dS)
+        const cwInner = cw - pad * 2 - mS * 1.4                              // usable text width inside the code box
+        const cw0 = measure(ft.c, mS, '500', FONT.mono)
+        const cS = cw0 > cwInner ? Math.max(11, Math.floor(mS * cwInner / cw0)) : mS   // shrink so the snippet never overflows
+        const codeH = cS * 2.7
+        const h = pad + Math.max(icR * 2, titleS * 2.2) + dl.length * dS * 1.4 + 18 + codeH + pad
         if (y + h > navH && y < H) {
           cx.save(); cx.shadowColor = 'rgba(20,12,6,0.13)'; cx.shadowBlur = 14; cx.shadowOffsetY = 6; f.rect({ x: x0, y, w: cw, h, radius: 16, fill: PAL.cream, stroke: 'rgba(20,15,10,0.12)', strokeWidth: 1 }); cx.restore()
           f.rect({ x: x0 + 7, y: y + pad, w: 5, h: h - pad * 2, radius: 3, fill: ft.col })
@@ -99,11 +116,11 @@ export function paintMobile(el: HTMLElement): Instance {
           label('EXHIBIT ' + (idx + 1) + ' / 8', tx, y + pad + titleS + dS * 1.05, mS * 0.82, ft.col, '800')
           let dy = y + pad + Math.max(icR * 2, titleS * 2.2) + dS * 0.9
           for (const ln of dl) { label(ln, x0 + pad, dy, dS, 'rgba(20,20,20,0.78)', '500'); dy += dS * 1.4 }
-          dy += 8
+          dy += 16
           f.rect({ x: x0 + pad, y: dy, w: cw - pad * 2, h: codeH, radius: 8, fill: '#0d1117' })
-          label(ft.c, x0 + pad + mS * 0.7, dy + mS * 1.5, mS, '#c9d1d9', '500', 'left', FONT.mono)
+          cx.save(); cx.font = `500 ${cS}px ${FONT.mono}`; cx.textBaseline = 'alphabetic'; drawCodeLine(cx, ft.c, x0 + pad + mS * 0.7, dy + codeH / 2 + cS * 0.35); cx.restore()
         }
-        y += h + 14
+        y += h + 24
       })
 
       // ── footer ──

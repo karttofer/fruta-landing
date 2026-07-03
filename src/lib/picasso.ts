@@ -9,6 +9,7 @@ import { PAL, shade, FEATURES } from './picassoShared'
 import { paintMobile } from './picassoMobile'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'
+import { drawCodeLine } from './codeHighlight'
 
 type Instance = { destroy(): void }
 type Pt = { x: number; y: number }
@@ -157,9 +158,9 @@ function desktop(el: HTMLElement): Instance {
       const wy = narrow ? H * 0.16 : H * 0.4                             // pushed below the top nav bar
       const tagMaxW = narrow ? W * 0.92 : Math.min(W * 0.42, 470)
       cx.save(); cx.globalAlpha = tAlpha
-      label('Fruta', anchor + wm * 0.05, wy + wm * 0.05, wm, PAL.verm, '800', al, FONT.display)
-      cx.save(); cx.shadowColor = 'rgba(30,16,8,0.25)'; cx.shadowBlur = wm * 0.08; cx.shadowOffsetY = wm * 0.03; label('Fruta', anchor, wy, wm, PAL.ink, '800', al, FONT.display); cx.restore()
-      let ty = wy + wm * 0.34 + ts * 0.9                               // extra breathing room below the wordmark
+      const wmw = Math.round(Math.min(wm, wm * (narrow ? W * 0.8 : Math.min(W * 0.42, 470)) / Math.max(1, measure('fruta.ts', wm, '800', FONT.mono))))
+      cx.save(); cx.shadowColor = 'rgba(30,16,8,0.22)'; cx.shadowBlur = wmw * 0.06; cx.shadowOffsetY = wmw * 0.025; label('fruta.ts', anchor, wy, wmw, PAL.ink, '800', al, FONT.mono); cx.restore()
+      let ty = wy + wmw * 0.45 + ts * 0.9                              // extra breathing room below the wordmark
       for (const ln of wrap('A tiny, friendly 2D engine for the web — this page is a fruta painting. Hover a piece to explore.', tagMaxW, ts, '500')) { label(ln, anchor, ty, ts, 'rgba(20,20,20,0.74)', '500', al); ty += ts * 1.42 }
       ty += cs * 1.2
       // chips — pack into rows so they never overflow (centred rows on narrow)
@@ -193,7 +194,8 @@ function desktop(el: HTMLElement): Instance {
         label('EXHIBIT ' + (openF + 1) + ' / 8', cxp2 + pad2, yy - tS * 0.9, mS * 0.8, PAL.verm, '800')
         label(ft.t, cxp2 + pad2, yy + mS * 0.4, tS, PAL.ink, '800', 'left', FONT.display); yy += tS * 0.8 + dS
         for (const ln of dl) { label(ln, cxp2 + pad2, yy, dS, 'rgba(20,20,20,0.8)', '500'); yy += dS * 1.45 }
-        yy += mS * 0.6; f.rect({ x: cxp2 + pad2, y: yy, w: cw - pad2 * 2, h: mS * 2.4, radius: 8, fill: '#0d1117' }); label(ft.c, cxp2 + pad2 + mS * 0.7, yy + mS * 1.55, mS, '#c9d1d9', '500', 'left', FONT.mono)
+        yy += mS * 0.6; f.rect({ x: cxp2 + pad2, y: yy, w: cw - pad2 * 2, h: mS * 2.4, radius: 8, fill: '#0d1117' })
+        cx.save(); cx.font = `500 ${mS}px ${FONT.mono}`; cx.textBaseline = 'alphabetic'; drawCodeLine(cx, ft.c, cxp2 + pad2 + mS * 0.7, yy + mS * 1.55); cx.restore()
         label('click anywhere to close', cxp2 + cw - pad2, cyp + ch - pad2 * 0.5, mS * 0.85, 'rgba(20,20,20,0.45)', '500', 'right')
       } else label('🖱 hover & click the pieces — each is a fruta feature', narrow ? W * 0.5 : W * 0.06 + 4, H - Math.max(18, S * 0.028), Math.max(12, Math.round(S * 0.015)), 'rgba(20,20,20,0.5)', '600', narrow ? 'center' : 'left')
 
