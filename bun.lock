@@ -7,6 +7,7 @@
       "dependencies": {
         "@muten/core": "0.0.34",
         "@muten/shadcn": "0.0.5",
+        "fruta": "^0.1.4",
         "highlight.js": "^11.11.1",
       },
       "devDependencies": {
@@ -213,6 +214,8 @@
     "exsolve": ["exsolve@1.1.0", "", {}, "sha512-D+42+T12DdIlJM3uepa55qGiL3sYdLBOxIl2ifQCzCHz4c7eiolaHsi3BIqEr7JxBzxv2pYZQX9kw16ziMcEmw=="],
 
     "fdir": ["fdir@6.5.0", "", { "peerDependencies": { "picomatch": "^3 || ^4" }, "optionalPeers": ["picomatch"] }, "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="],
+
+    "fruta": ["fruta@0.1.4", "", {}, "sha512-WbRtYMgu6SiYomHhqsUfYQPvgH9T1Hb7Qi/oZvEDiVv+RYtaB/u8C/p1rlelYhlXdYcZkGUPYeZqjdAjic2sLQ=="],
 
     "fsevents": ["fsevents@2.3.3", "", { "os": "darwin" }, "sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw=="],
 

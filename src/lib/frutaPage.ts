@@ -2,7 +2,7 @@
 // design language as the home. Handles: a cubist scene, a drawn top nav, a scrollable content column of blocks
 // (heading / paragraph / code / chips / buttons), text wrapping, wheel scroll, and hit-tested navigation. Static
 // pages (docs) use frutaPage() directly; interactive pages (examples/playground) reuse the exported helpers.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'
 import { runCode, stopCode } from './run'

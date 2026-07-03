@@ -17,7 +17,7 @@ const app: any = new Proxy(
 ;(globalThis as any).MutationObserver = class { observe() {} disconnect() {} }
 try { (globalThis as any).location = { pathname: '/docs' } } catch {}
 
-mock.module('../../../../src/core/fruta', () => ({ default: () => app, noise: () => 0, hsl: () => '#fff', hsla: () => '#fff' }))
+mock.module('fruta', () => ({ default: () => app, noise: () => 0, hsl: () => '#fff', hsla: () => '#fff' }))
 
 test('docs + examples + playground paint + nav-press + destroy without throwing', async () => {
   const { paintScreen } = await import('./screens')

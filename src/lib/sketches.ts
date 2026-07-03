@@ -1,7 +1,7 @@
 // The `use` facade: fruta is imported HERE (a real module — imports work) and exposed as run(el, name)
 // for the inlined Custom to call. Each sketch is a small live fruta program that shows a capability on
 // the site itself — the fruta site runs on fruta.
-import Fruta, { noise, hsl } from '../../../../src/core/fruta'
+import Fruta, { noise, hsl } from 'fruta'
 
 type Instance = { destroy(): void }
 const live = new WeakMap<HTMLElement, Instance>()

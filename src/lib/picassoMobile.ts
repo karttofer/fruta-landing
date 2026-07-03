@@ -2,7 +2,7 @@
 // separate renderer). A sticky nav, a hero (wordmark + a bobbing cubist cube + big stacked CTAs), then the 8
 // features as colourful cubist cards you scroll through. Drag to scroll, tap the nav/CTAs to navigate. Painterly
 // (gradients + soft shadows) and dpr-crisp.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 import { PAL, shade, FEATURES } from './picassoShared'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'

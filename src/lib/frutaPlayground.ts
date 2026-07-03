@@ -2,7 +2,7 @@
 // drawn + hit-tested in the fruta canvas. The two bits that must be DOM are framed by it: a <textarea> (you can't
 // type into a canvas) and the live preview node (its own fruta canvas via runUserCode). Responsive: on resize
 // the chrome rebuilds and the overlays reposition; below 720px the panels stack.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 import { PERIODS, go, drawScene, textKit, type Instance } from './frutaPage'
 import { runUserCode, starterCode } from './playground'
 import { FONT, ensureFonts } from './fonts'

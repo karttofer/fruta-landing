@@ -2,7 +2,7 @@
 // you read is the code that runs) and the playground (your own code). `Fruta` is injected; the canvas
 // auto-mounts into the host (mount defaults to el). Previous instances on that host are destroyed first,
 // so re-running never leaks a loop.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 
 const reg = new WeakMap<HTMLElement, Array<{ destroy(): void }>>()
 

@@ -4,7 +4,7 @@
 // to name and click to read (plaque + code). Painterly (gradients + soft shadows). Responsive: side-by-side on
 // wide screens, text-over-art stacked on narrow. Click-drag on empty space paints your own shards.
 // Desktop renderer (the Proun). paintLanding (bottom) routes to the mobile design below 820px.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 import { PAL, shade, FEATURES } from './picassoShared'
 import { paintMobile } from './picassoMobile'
 import { FONT, ensureFonts } from './fonts'

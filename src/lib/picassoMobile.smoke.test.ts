@@ -13,7 +13,7 @@ const app: any = new Proxy(
 ;(globalThis as any).window = { innerWidth: 390, innerHeight: 780, addEventListener() {}, removeEventListener() {}, open() {} }
 ;(globalThis as any).document = { createElement: () => node(), body: node() }
 
-mock.module('../../../../src/core/fruta', () => ({ default: () => app }))
+mock.module('fruta', () => ({ default: () => app }))
 
 test('mobile home: frames + drag-scroll + nav tap + destroy without throwing', async () => {
   const { paintMobile } = await import('./picassoMobile')

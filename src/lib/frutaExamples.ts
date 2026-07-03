@@ -2,7 +2,7 @@
 // Preview/Code toggle — is all drawn in the fruta canvas + hit-tested. The two things that must be real DOM are
 // framed by it: the live example (its own fruta canvas, mounted in an overlay div) and, in Code mode, the raw
 // source (drawn as fruta monospace text — no DOM). Responsive: rebuilt on resize, overlay repositioned.
-import Fruta from '../../../../src/core/fruta'
+import Fruta from 'fruta'
 import { PERIODS, go, drawScene, textKit, type Instance } from './frutaPage'
 import { EXAMPLES, runExample } from './examples'
 import { FONT, ensureFonts } from './fonts'

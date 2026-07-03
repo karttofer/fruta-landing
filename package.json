@@ -10,6 +10,7 @@
   "dependencies": {
     "@muten/core": "0.0.34",
     "@muten/shadcn": "0.0.5",
+    "fruta": "^0.1.4",
     "highlight.js": "^11.11.1"
   },
   "devDependencies": {

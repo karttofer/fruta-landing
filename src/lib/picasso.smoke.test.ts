@@ -15,7 +15,7 @@ const app: any = new Proxy(
 ;(globalThis as any).window = { innerWidth: 1200, innerHeight: 800, addEventListener() {}, removeEventListener() {}, open() {} }
 ;(globalThis as any).document = { createElement: () => ({ href: '', style: {}, appendChild() {}, click() {}, remove() {} }), body: { appendChild() {}, removeChild() {} } }
 
-mock.module('../../../../src/core/fruta', () => ({ default: () => app }))
+mock.module('fruta', () => ({ default: () => app }))
 
 test('cubist landing: 125 frames + paint + nav press without throwing', async () => {
   const { paintLanding } = await import('./picasso')

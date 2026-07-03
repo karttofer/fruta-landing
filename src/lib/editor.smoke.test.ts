@@ -18,7 +18,7 @@ const node = (): any => new Proxy({ style: {}, dataset: {}, checked: true, value
 ;(globalThis as any).window = { innerWidth: 1200, innerHeight: 800, addEventListener() {}, removeEventListener() {}, open() {} }
 ;(globalThis as any).document = { createElement: () => node(), createTextNode: () => node(), body: node() }   // no `head` → Monaco skipped
 
-mock.module('../../../../src/core/fruta', () => ({ default: () => app }))
+mock.module('fruta', () => ({ default: () => app }))
 
 test('mountEditor: builds the editor, runs the starter, destroys — no throw', async () => {
   const { mountEditor } = await import('./editor')
