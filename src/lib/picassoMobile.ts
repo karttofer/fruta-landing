@@ -7,6 +7,7 @@ import { PAL, shade, FEATURES } from './picassoShared'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'
 import { drawCodeLine } from './codeHighlight'
+import { mutenLogoImage } from './logo'
 
 type Instance = { destroy(): void }
 
@@ -124,7 +125,15 @@ export function paintMobile(el: HTMLElement): Instance {
       })
 
       // ── footer ──
-      label('MIT · built with fruta and muten', W / 2, y + ts, ts * 0.85, 'rgba(20,20,20,0.5)', '500', 'center'); y += ts * 2.4
+      label('MIT · free & open source', W / 2, y + ts, ts * 0.85, 'rgba(20,20,20,0.5)', '500', 'center'); y += ts * 2
+      // powered by [muten logo] — centred lockup, tappable
+      const mImg = mutenLogoImage(), pmS = ts * 0.92, lbl = 'powered by'
+      const lw = measure(lbl, pmS, '600'), ic = pmS * 1.5, gap = pmS * 0.5, total = lw + gap + ic
+      const lx = W / 2 - total / 2, by = y + pmS, mid = by - pmS * 0.32
+      label(lbl, lx, by, pmS, 'rgba(20,20,20,0.6)', '600', 'left')
+      if (mImg && mImg.complete && mImg.naturalWidth) { try { cx.drawImage(mImg, lx + lw + gap, mid - ic / 2, ic, ic) } catch { /* not decoded yet */ } }
+      taps.push({ x: lx, y: mid - ic / 2, w: total, h: ic, to: 'https://www.npmjs.com/package/@muten/core', ext: true })
+      y += ts * 2.8
       contentH = y + scroll + 10
       scroll = clamp(scroll)
 

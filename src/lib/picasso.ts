@@ -10,6 +10,7 @@ import { paintMobile } from './picassoMobile'
 import { FONT, ensureFonts } from './fonts'
 import { drawNavBar, type NavHit } from './nav'
 import { drawCodeLine } from './codeHighlight'
+import { mutenLogoImage } from './logo'
 
 type Instance = { destroy(): void }
 type Pt = { x: number; y: number }
@@ -197,7 +198,16 @@ function desktop(el: HTMLElement): Instance {
         yy += mS * 0.6; f.rect({ x: cxp2 + pad2, y: yy, w: cw - pad2 * 2, h: mS * 2.4, radius: 8, fill: '#0d1117' })
         cx.save(); cx.font = `500 ${mS}px ${FONT.mono}`; cx.textBaseline = 'alphabetic'; drawCodeLine(cx, ft.c, cxp2 + pad2 + mS * 0.7, yy + mS * 1.55); cx.restore()
         label('click anywhere to close', cxp2 + cw - pad2, cyp + ch - pad2 * 0.5, mS * 0.85, 'rgba(20,20,20,0.45)', '500', 'right')
-      } else label('🖱 hover & click the pieces — each is a fruta feature', narrow ? W * 0.5 : W * 0.06 + 4, H - Math.max(18, S * 0.028), Math.max(12, Math.round(S * 0.015)), 'rgba(20,20,20,0.5)', '600', narrow ? 'center' : 'left')
+      } else {
+        label('🖱 hover & click the pieces — each is a fruta feature', narrow ? W * 0.5 : W * 0.06 + 4, H - Math.max(18, S * 0.028), Math.max(12, Math.round(S * 0.015)), 'rgba(20,20,20,0.5)', '600', narrow ? 'center' : 'left')
+        // powered by [muten logo] — bottom-right lockup, tappable
+        const mImg = mutenLogoImage(), pmS = Math.max(12, Math.round(S * 0.015)), pmM = Math.max(18, S * 0.028)
+        const lbl = 'powered by', lw = measure(lbl, pmS, '600'), ic = pmS * 1.5, gap = pmS * 0.5
+        const rEdge = W - pmM, by = H - pmM, mid = by - pmS * 0.32, iconX = rEdge - ic
+        label(lbl, iconX - gap, by, pmS, 'rgba(20,20,20,0.6)', '600', 'right')
+        if (mImg && mImg.complete && mImg.naturalWidth) { try { cx.drawImage(mImg, iconX, mid - ic / 2, ic, ic) } catch { /* not decoded yet */ } }
+        buttons.push({ x: rEdge - lw - gap - ic, y: mid - ic / 2, w: lw + gap + ic, h: ic, to: 'https://www.npmjs.com/package/@muten/core', ext: true })
+      }
 
       if (f.canvas) f.canvas.style.cursor = hit(mx, my) || exAt(mx, my) >= 0 || navHits.some((r) => mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) ? 'pointer' : 'crosshair'
     })
